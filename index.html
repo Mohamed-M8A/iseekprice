@@ -312,63 +312,107 @@
 </footer>
 
 
+
+
+
+
     
-  
-<b:includable id='Share' var='post'>
-  <b:if cond='data:widget.allBylineItems.share'>
+<div class='share-box'>
+  <button class='share-open-btn' id='shareOpenBtn' type='button'>
+    مشاركة مع الاصدقاء
+  </button>
+</div>
 
-    <div class='share-box'>
-      <button class='share-open-btn' type='button'>
-        مشاركة مع الاصدقاء
-      </button>
-    </div>
-
-<div class='share-modal' id='shareModal'>
+<div class='share-modal' id='shareModal' style="display:none;">
   <div class='modal-content'>
-    <span class='modal-close-btn' id='closeModal'>&#215;</span>
+    <span class='modal-close-btn' id='shareCloseBtn'>&times;</span>
     <h3 class='modal-title'>مشاركة عبر</h3>
     
-    <div class='share-links'>
-      <a class='share-btn s-fb' expr:href='&quot;https://www.facebook.com/sharer.php?u=&quot; + data:post.url.canonical' rel='nofollow noopener noreferrer' target='_blank' title='فيسبوك'>
-        <svg><use xlink:href='#i-facebook'/></svg>
+    <div class='share-links' id='shareLinksContainer'>
+      <a class='share-btn s-fb' href='#' target='_blank' title='فيسبوك'>
+        <svg class="icon"><use href='/assets/static/icons.svg#i-facebook'/></svg>
         <span>فيسبوك</span>
       </a>
 
-      <a class='share-btn s-x' expr:onclick='&quot;window.open(\&quot;https://x.com/intent/tweet?text=\&quot; + encodeURIComponent(document.querySelector(\&quot;h1\&quot;).innerText + \&quot; | عبر &quot; + data:blog.title + &quot;\\n\&quot;) + \&quot;&amp;url=&quot; + data:post.url.canonical + &quot;\&quot;, \&quot;_blank\&quot;); return false;&quot;' href='javascript:void(0)' title='X'>
-        <svg><use xlink:href='#i-x'/></svg>
+      <a class='share-btn s-x' href='#' target='_blank' title='إكس'>
+        <svg class="icon"><use href='/assets/static/icons.svg#i-x'/></svg>
         <span>إكس</span>
       </a>
 
-      <a class='share-btn s-pin' expr:href='&quot;https://pinterest.com/pin/create/button/?url=&quot; + data:post.url.canonical + &quot;&amp;media=&quot; + data:post.featuredImage + &quot;&amp;description=&quot; + data:post.title' rel='nofollow noopener noreferrer' target='_blank' title='بينترست'>
-        <svg><use xlink:href='#i-pinterest'/></svg>
-        <span>بينترست</span>
-      </a>
-
-      <a class='share-btn s-wa' expr:onclick='&quot;window.open(\&quot;https://wa.me/?text=\&quot; + encodeURIComponent(document.querySelector(\&quot;h1\&quot;).innerText + \&quot;\\n\&quot; + data:post.url.canonical + \&quot;\\nعبر: &quot; + data:blog.title + &quot;\&quot;), \&quot;_blank\&quot;); return false;&quot;' href='javascript:void(0)' title='واتساب'>
-        <svg><use xlink:href='#i-whatsapp'/></svg>
+      <a class='share-btn s-wa' href='#' target='_blank' title='واتساب'>
+        <svg class="icon"><use href='/assets/static/icons.svg#i-whatsapp'/></svg>
         <span>واتساب</span>
       </a>
 
-      <a class='share-btn s-tg' expr:onclick='&quot;window.open(\&quot;https://t.me/share/url?url=&quot; + data:post.url.canonical + &quot;&amp;text=\&quot; + encodeURIComponent(document.querySelector(\&quot;h1\&quot;).innerText + \&quot; | &quot; + data:blog.title + &quot;\&quot;), \&quot;_blank\&quot;); return false;&quot;' href='javascript:void(0)' title='تيليجرام'>
-        <svg><use xlink:href='#i-telegram'/></svg>
+      <a class='share-btn s-tg' href='#' target='_blank' title='تيليجرام'>
+        <svg class="icon"><use href='/assets/static/icons.svg#i-telegram'/></svg>
         <span>تيليجرام</span>
       </a>
 
-      <a class='share-btn s-rd' expr:href='&quot;https://www.reddit.com/submit?url=&quot; + data:post.url.canonical + &quot;&amp;title=&quot; + data:post.title' rel='nofollow noopener noreferrer' target='_blank' title='ريديت'>
-        <svg><use xlink:href='#i-reddit'/></svg>
+      <a class='share-btn s-pin' href='#' target='_blank' title='بينترست'>
+        <svg class="icon"><use href='/assets/static/icons.svg#i-pinterest'/></svg>
+        <span>بينترست</span>
+      </a>
+
+      <a class='share-btn s-rd' href='#' target='_blank' title='ريديت'>
+        <svg class="icon"><use href='/assets/static/icons.svg#i-reddit'/></svg>
         <span>ريديت</span>
       </a>
 
-      <a class='share-btn s-em' expr:href='&quot;mailto:?subject=&quot; + data:post.title + &quot;&amp;body=&quot; + data:post.url.canonical' rel='nofollow noopener noreferrer' target='_blank' title='بريد إلكتروني'>
-        <svg><use xlink:href='#i-email'/></svg>
+      <a class='share-btn s-em' href='#' target='_blank' title='بريد إلكتروني'>
+        <svg class="icon"><use href='/assets/static/icons.svg#i-email'/></svg>
         <span>بريد إلكتروني</span>
       </a>
     </div>
   </div>
 </div>
-    
-  </b:if>
-</b:includable>  
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('shareModal');
+    const openBtn = document.getElementById('shareOpenBtn');
+    const closeBtn = document.getElementById('shareCloseBtn');
+
+    if (openBtn) {
+        openBtn.onclick = function() {
+            const url = encodeURIComponent(window.location.href);
+            const title = encodeURIComponent(document.title);
+            
+            const shareLinks = {
+                's-fb': `https://www.facebook.com/sharer.php?u=${url}`,
+                's-x': `https://x.com/intent/tweet?text=${title}&url=${url}`,
+                's-wa': `https://wa.me/?text=${title}%20${url}`,
+                's-tg': `https://t.me/share/url?url=${url}&text=${title}`,
+                's-pin': `https://pinterest.com/pin/create/button/?url=${url}&description=${title}`,
+                's-rd': `https://www.reddit.com/submit?url=${url}&title=${title}`,
+                's-em': `mailto:?subject=${title}&body=${url}`
+            };
+
+            for (const [className, link] of Object.entries(shareLinks)) {
+                const el = modal.querySelector(`.${className}`);
+                if (el) el.href = link;
+            }
+
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        };
+    }
+
+    if (closeBtn) {
+        closeBtn.onclick = function() {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        };
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    };
+});
+</script>
   
   
   
@@ -430,50 +474,33 @@
 </b:includable>  
   
 
-
-  
-  
 <!-- (JS LINKS) -->      
 <!-- (JS GENERAL LINKS) -->  
-<script defer='defer' src='https://cdn.jsdelivr.net/gh/Mohamed-M8A/CDN/JS/General/worker.js'/>  
-<script defer='defer' src='https://cdn.jsdelivr.net/gh/Mohamed-M8A/CDN/JS/General/grid.js'/>  
-<script defer='defer' src='https://cdn.jsdelivr.net/gh/Mohamed-M8A/CDN/JS/General/corepress.js'/>    
-<script defer='defer' src='https://cdn.jsdelivr.net/gh/Mohamed-M8A/CDN/JS/General/search.js'/>
-  
+<script defer src='/js/general/worker.js'></script>  
+<script defer src='/js/general/grid.js'></script>  
+<script defer src='/js/general/corepress.js'></script>    
+<script defer src='/js/general/search.js'></script>
 
-<!-- (HOME) -->
-<b:if cond='data:blog.pageType == &quot;index&quot;'>
+<script>
+  const path = window.location.pathname;
+  const urlParams = new URLSearchParams(window.location.search);
+
+  if (path.includes('/product/') || urlParams.has('id')) {
+    document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js"><\/script>');
     
-</b:if>
+    document.write('<script defer src="/js/product/fetch.js"><\/script>');
+    document.write('<script defer src="/js/product/make.js"><\/script>');
+  }
+</script>
 
-  
-<!-- (PAGES) -->
-<b:if cond='data:blog.pageType == &quot;static_page&quot;'>
-    
-</b:if>
-  
-<!-- (POSTS) -->
-<b:if cond='data:blog.pageType == &quot;item&quot;'>
-  
-<script src='https://cdn.jsdelivr.net/npm/chart.js'/>
-<script defer='defer' src='https://cdn.jsdelivr.net/gh/Mohamed-M8A/CDN/JS/Product/fetch.js'/>    
-<script defer='defer' src='https://cdn.jsdelivr.net/gh/Mohamed-M8A/CDN/JS/Product/make.js'/>  
-  
-</b:if>
-
-  
 <script type='text/javascript'>
-<![CDATA[
-
-if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('https://cdn.jsdelivr.net/gh/Mohamed-M8A/CDN/JS/General/sw.js')
+      navigator.serviceWorker.register('/js/general/sw.js')
         .then(reg => console.log('Service Worker Registered!', reg))
         .catch(err => console.error('Service Worker Failed!', err));
     });
   }
-
-]]>
 </script>
   
 
