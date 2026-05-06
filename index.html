@@ -174,7 +174,7 @@
 <div id='widget-overlay'></div>  
 
     
-<!-- Hero Banner (يظهر في الصفحة الرئيسية index.html فقط) -->
+<!-- Hero Banner -->
 <div id='Hero-Banner-Container'>
   <div class='full-width-banner'>
     <h2>مرحباً بك في عالم الإبداع</h2>
@@ -364,64 +364,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
   
-  
-  
 
-
-    
-    
-<b:includable id='Post' var='post'>
-  <article id='single-content'>
-    <b:include data='post' name='PostMeta'/>
-    <header>
-      <h1 class='entry-title' style='display:none'><data:post.title/></h1>
-      <div class='entry-meta'>
-      </div>
-    </header>
-    <div id='post-body'>
-      <hr class='clean-divider'/>
-    <main><data:post.body/></main>
-    </div>
-    <hr class='clean-divider'/>
-    <b:include data='post' name='Share'/>  
-    <hr class='clean-divider'/>
-    <p>عروض ستعجبك</p>
-    <div id='souq-widget-root'/> 
-  </article>
-</b:includable>
-  
-  
-
-
-  
-<b:includable id='404'>
-  <article id='page-content' style='text-align:center;'>
-          <hr class='clean-divider'/>
-    <img alt='404 Logo' src='https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEid04__f9ZXVSwmeXxxqswefR2iv0RO6_3pl5_ex68fceP0h2ZdW9PYR4woqT50JTLomtLIQvhngfdaJtr8GN4oj2NwI5rsb8qi5TkEgZbomD-6lSLAuOo1Q-E_1U0qtMcJJ2VrNayn_CsgByN7NbjArkmljq9G7zjl_jQ95EI9AFzDMKvZWDWd8lqv/w640-h640/%D9%86%D8%B3%D8%AE%D8%A9_%D9%85%D9%86_Black_White_Minimalist_Initials_Logo__1_-removebg-preview.png' style='max-width:300px; margin-bottom:20px;'/>
-    
-    <h1>404 - الصفحة غير موجودة</h1>
-    <p><a href='https://www.iseekprice.com/'>العودة إلى الرئيسية</a></p>
-    </article>
-    <hr class='clean-divider'/>
-    <p>عروض ستعجبك</p>
-    <div id='souq-widget-root'/> 
-</b:includable>  
-  
-  
-  
-  
-
-<b:includable id='Page' var='post'>
-  <article id='page-content'>
-    <header>
-      <h1 class='entry-title' style='display:none'><data:post.title/></h1>
-    </header>
-    <div>
-      <hr class='clean-divider'/>
-      <data:post.body/>
-    </div>
-  </article>
-</b:includable>  
   
 
 <!-- (JS LINKS) -->      
