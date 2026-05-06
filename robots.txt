@@ -1,6 +1,0 @@
-User-agent: *
-
-Disallow: /p/search.html
-Disallow: /search
-
-Allow: /
