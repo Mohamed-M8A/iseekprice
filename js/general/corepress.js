@@ -20,10 +20,29 @@ function addToCart(id){if(!id){showCartToast("عذراً، لم يتم العث�
 document.addEventListener("click",function(e){const b=e.target.closest(".external-cart-button");if(b){e.preventDefault();e.stopPropagation();const p=e.target.closest(".post-card");const id=p?p.querySelector(".UID")?.textContent.trim():null;addToCart(id)}const a=e.target.closest(".add-to-cart");if(a){e.preventDefault();e.stopPropagation();const u=document.querySelector(".UID");addToCart(u?u.textContent.trim():null)}});
 
 // =================== Share + DM + Back To Top  ===================
-document.addEventListener('DOMContentLoaded',function(){var modal=document.querySelector('.share-modal');var openBtn=document.querySelector('.share-open-btn');var closeBtn=document.querySelector('.modal-close-btn');if(modal&&openBtn&&closeBtn){openBtn.onclick=function(){modal.style.display='block';document.body.style.overflow='hidden'}
-closeBtn.onclick=function(){modal.style.display='none';document.body.style.overflow='auto'}
-window.onclick=function(event){if(event.target==modal){modal.style.display='none';document.body.style.overflow='auto'}}}})
 
+document.addEventListener('DOMContentLoaded', function() {
+    const pageUrl = encodeURIComponent(window.location.href);
+    const pageTitle = encodeURIComponent(document.title);
+    const modalHTML = `
+    <div class='share-modal' id='shareModal' style="display:none;">
+      <div class='modal-content'>
+        <span class='modal-close-btn' id='shareCloseBtn'>&times;</span>
+        <h3 class='modal-title'>مشاركة عبر</h3>
+        <div class='share-links'>
+          <a class='share-btn s-fb' href="https://www.facebook.com/sharer/sharer.php?u=${pageUrl}" target='_blank'><svg class="icon"><use href='/assets/static/icons.svg#i-facebook'/></svg><span>فيسبوك</span></a>
+          <a class='share-btn s-x' href="https://twitter.com/intent/tweet?text=${pageTitle}&url=${pageUrl}" target='_blank'><svg class="icon"><use href='/assets/static/icons.svg#i-x'/></svg><span>إكس</span></a>
+          <a class='share-btn s-wa' href="https://api.whatsapp.com/send?text=${pageTitle}%20${pageUrl}" target='_blank'><svg class="icon"><use href='/assets/static/icons.svg#i-whatsapp'/></svg><span>واتساب</span></a>
+          <a class='share-btn s-tg' href="https://t.me/share/url?url=${pageUrl}&text=${pageTitle}" target='_blank'><svg class="icon"><use href='/assets/static/icons.svg#i-telegram'/></svg><span>تيليجرام</span></a>
+          <a class='share-btn s-pin' href="https://pinterest.com/pin/create/button/?url=${pageUrl}&description=${pageTitle}" target='_blank'><svg class="icon"><use href='/assets/static/icons.svg#i-pinterest'/></svg><span>بينترست</span></a>
+          <a class='share-btn s-rd' href="https://reddit.com/submit?url=${pageUrl}&title=${pageTitle}" target='_blank'><svg class="icon"><use href='/assets/static/icons.svg#i-reddit'/></svg><span>ريديت</span></a>
+          <a class='share-btn s-em' href="mailto:?subject=${pageTitle}&body=${pageUrl}"><svg class="icon"><use href='/assets/static/icons.svg#i-email'/></svg><span>بريد إلكتروني</span></a>
+        </div>
+      </div>
+    </div>`;
+    document.body.insertAdjacentHTML('beforeend',modalHTML);const modal=document.getElementById('shareModal'),openBtn=document.getElementById('shareOpenBtn'),closeBtn=document.getElementById('shareCloseBtn'),closeModal=function(){modal.style.display='none',document.body.style.overflow='auto'};if(openBtn)openBtn.onclick=function(){modal.style.display='block',document.body.style.overflow='hidden'};if(closeBtn)closeBtn.onclick=closeModal;window.onclick=function(e){if(e.target==modal)closeModal()};document.querySelectorAll('.share-btn').forEach(function(b){if(!b.classList.contains('s-em')&&!b.classList.contains('s-wa')){b.onclick=function(e){e.preventDefault(),window.open(this.href,'share-dialog','width=600,height=400')}}});
+});
+                                                        
 var htmlEl=document.documentElement,darkBtn=document.getElementById("dark-toggler"),iconUse=darkBtn ? darkBtn.querySelector("use") :null;function switchIcon(theme){if(!iconUse) return;if(theme==="dark"){iconUse.setAttribute("xlink:href","#i-sun");iconUse.setAttribute("href","#i-sun")}else{iconUse.setAttribute("xlink:href","#i-moon");iconUse.setAttribute("href","#i-moon")}}function applyTheme(theme,persist){if(theme==="dark"){htmlEl.classList.add("dark-mode");htmlEl.setAttribute("data-theme","dark")}else{htmlEl.classList.remove("dark-mode");htmlEl.setAttribute("data-theme","light")}switchIcon(theme);if(persist){try{localStorage.setItem("theme",theme)}catch(e){}}}var savedTheme;try{savedTheme=localStorage.getItem("theme")}catch(e){savedTheme=null}if(!savedTheme){savedTheme=window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark":"light"}applyTheme(savedTheme,false);if(darkBtn){darkBtn.addEventListener("click",function(e){e.preventDefault();var isDark=htmlEl.classList.contains("dark-mode");applyTheme(isDark ? "light":"dark",true)})}
 
 (function(){const b=document.createElement('div');b.id='back-to-top';b.innerHTML=`<a aria-label='Back to Top' href='#top'><svg class='icon'><use xlink:href='#i-arrow-t'/></svg></a>`;document.body.appendChild(b);window.addEventListener('scroll',()=>{b.classList.toggle('show',window.scrollY>800)},{passive:true});b.addEventListener('click',(e)=>{e.preventDefault();window.scrollTo({top:0,behavior:'smooth'})})})();
