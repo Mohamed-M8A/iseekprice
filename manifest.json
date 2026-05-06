@@ -4,7 +4,7 @@
   "description": "تطبيق تسوق ذكي يتيح لك تجربة تسوق افضل",
   "icons": [
     {
-      "src": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh7g63iENevOigVi9lnvd9DYi2TUPjSKCYSZvjvzs7AjNderuoeFc0vGllEYuYDeSX7PF_OtSQrbQPt4ZevPF3wxKOK4_rZ0Rf4gyfCvS0McGP8SmAl6ISZkyCnZdKAvW2OL6F2YfUG9a9fwzMZYZTDHtHy_QF8VYKhTkjrss-snxUWtSzn7xhYDq01/s320/Black%20White%20Minimalist%20Initials%20Logo%20(1)-Photoroom.png",
+      "src": "assets/icons/192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
