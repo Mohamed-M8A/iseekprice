@@ -2,7 +2,7 @@
 
 (function injectAndInitializeHeader() {
     
-    // === 1. Injection Logic ===
+    // 1. === Injection Logic (HTML) ===
     const logoWrap = document.getElementById('logo-wrap');
     if (logoWrap) logoWrap.innerHTML = `<a href='/'><img alt='شعار الموقع' src='/assets/static/favicon.png'/></a>`;
 
@@ -22,12 +22,12 @@
             <div class='custom-dropdown' id='countryDropdown'>
                 <div class='selected'><img alt='السعودية' height='16' src='/assets/flags/sa.png' width='16'/> السعودية</div>
                 <ul class='options'>
-                    <li data-value='SA'><img alt='السعودية' height='16' src='/public/assets/flags/sa.png' width='16'/> السعودية</li>
-                    <li data-value='AE'><img alt='الإمارات' height='16' src='/public/assets/flags/ae.png' width='16'/> الإمارات</li>
-                    <li data-value='OM'><img alt='عُمان' height='16' src='/public/assets/flags/om.png' width='16'/> عُمان</li>
-                    <li data-value='MA'><img alt='المغرب' height='16' src='/public/assets/flags/ma.png' width='16'/> المغرب</li>
-                    <li data-value='DZ'><img alt='الجزائر' height='16' src='/public/assets/flags/dz.png' width='16'/> الجزائر</li>
-                    <li data-value='TN'><img alt='تونس' height='16' src='/public/assets/flags/tn.png' width='16'/> تونس</li>
+                    <li data-value='SA'><img alt='السعودية' height='16' src='/assets/flags/sa.png' width='16'/> السعودية</li>
+                    <li data-value='AE'><img alt='الإمارات' height='16' src='/assets/flags/ae.png' width='16'/> الإمارات</li>
+                    <li data-value='OM'><img alt='عُمان' height='16' src='/assets/flags/om.png' width='16'/> عُمان</li>
+                    <li data-value='MA'><img alt='المغرب' height='16' src='/assets/flags/ma.png' width='16'/> المغرب</li>
+                    <li data-value='DZ'><img alt='الجزائر' height='16' src='/assets/flags/dz.png' width='16'/> الجزائر</li>
+                    <li data-value='TN'><img alt='تونس' height='16' src='/assets/flags/tn.png' width='16'/> تونس</li>
                 </ul>
             </div>
             <div class='dark-mode-toggle'>
@@ -49,24 +49,79 @@
             <div id='widget-side-list'></div>`;
     }
 
-    // === 2. Dark Mode ===
-    const htmlEl=document.documentElement;const darkBtn=document.getElementById("dark-toggler");function applyTheme(theme,persist){const iconUse=darkBtn?darkBtn.querySelector("use"):null;if(theme==="dark"){htmlEl.classList.add("dark-mode");htmlEl.setAttribute("data-theme","dark");if(iconUse)iconUse.setAttribute("href","#i-sun")}else{htmlEl.classList.remove("dark-mode");htmlEl.setAttribute("data-theme","light");if(iconUse)iconUse.setAttribute("href","#i-moon")}if(persist)localStorage.setItem("theme",theme)}
-    let savedTheme=localStorage.getItem("theme")||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");applyTheme(savedTheme,false);if(darkBtn){darkBtn.addEventListener("click",function(event){event.preventDefault();const isDark=htmlEl.classList.contains("dark-mode");applyTheme(isDark?"light":"dark",true)})}
+    // 2. === Dark Mode Logic ===
+    const htmlEl = document.documentElement;
+    const darkBtn = document.getElementById("dark-toggler");
+    function applyTheme(theme, persist) {
+        const iconUse = darkBtn ? darkBtn.querySelector("use") : null;
+        if (theme === "dark") {
+            htmlEl.classList.add("dark-mode");
+            htmlEl.setAttribute("data-theme", "dark");
+            if (iconUse) iconUse.setAttribute("href", "#i-sun");
+        } else {
+            htmlEl.classList.remove("dark-mode");
+            htmlEl.setAttribute("data-theme", "light");
+            if (iconUse) iconUse.setAttribute("href", "#i-moon");
+        }
+        if (persist) localStorage.setItem("theme", theme);
+    }
+    let savedTheme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    applyTheme(savedTheme, false);
+    if (darkBtn) darkBtn.addEventListener("click", e => { e.preventDefault(); applyTheme(htmlEl.classList.contains("dark-mode") ? "light" : "dark", true); });
 
-    // === 3. Cart Widget ===
-    function updateCartWidget(){const cart=JSON.parse(localStorage.getItem("cart"))||[];const cartCountElement=document.getElementById("cart-count");if(!cartCountElement)return;cartCountElement.textContent=cart.length;if(cart.length>0){cartCountElement.classList.add("active")}else{cartCountElement.classList.remove("active")}}
-    updateCartWidget();window.addEventListener("storage",function(event){if(event.key==="cart"){updateCartWidget()}});window.addEventListener("cartUpdated",updateCartWidget);const cartWidget=document.getElementById("cart-widget-header");if(cartWidget){cartWidget.addEventListener("click",function(){window.location.href="/pages/main/cart.html"})}
+    // 3. === Cart Logic ===
+    function updateCartWidget() {
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const countEl = document.getElementById("cart-count");
+        if (countEl) { countEl.textContent = cart.length; cart.length > 0 ? countEl.classList.add("active") : countEl.classList.remove("active"); }
+    }
+    updateCartWidget();
+    window.addEventListener("cartUpdated", updateCartWidget);
+    const cartBtn = document.getElementById("cart-widget-header");
+    if (cartBtn) cartBtn.onclick = () => window.location.href = "/pages/main/cart.html";
 
+    // 4. === Country Switcher Logic ===
+    const dropdown = document.getElementById("countryDropdown");
+    const selected = dropdown ? dropdown.querySelector(".selected") : null;
+    const options = dropdown ? dropdown.querySelector(".options") : null;
+    const url = new URL(window.location.href);
+    const paramCountry = url.searchParams.get("country");
+    const savedCountry = localStorage.getItem("Cntry");
+
+    function setActiveCountry(code, updateUrl = true) {
+        if (!options) return;
+        const li = options.querySelector(`li[data-value="${code}"]`);
+        if (!li) return;
+        localStorage.setItem("Cntry", code);
+        if (selected) selected.innerHTML = li.innerHTML;
+        if (updateUrl) { url.searchParams.set("country", code); window.history.replaceState({}, "", url); }
+    }
+
+    if (paramCountry) setActiveCountry(paramCountry); 
+    else if (savedCountry) setActiveCountry(savedCountry); 
+    else setActiveCountry("SA");
+
+    if (selected && options) {
+        selected.onclick = (e) => { e.stopPropagation(); dropdown.classList.toggle("open"); options.style.display = dropdown.classList.contains("open") ? "block" : "none"; };
+        options.onclick = (e) => {
+            const li = e.target.closest("li");
+            if (!li) return;
+            setActiveCountry(li.getAttribute("data-value"));
+            window.location.reload();
+        };
+    }
+    
+    // SEO (Canonical & Robots)
+    const canonical = document.createElement("link");
+    canonical.rel = "canonical";
+    canonical.href = window.location.origin + window.location.pathname;
+    document.head.appendChild(canonical);
+    if (paramCountry) {
+        const robots = document.createElement("meta");
+        robots.name = "robots"; robots.content = "noindex";
+        document.head.appendChild(robots);
+    }
 })();
-
-    // === 4. Country ===
-
-const dropdown=document.getElementById("countryDropdown");const selected=dropdown?dropdown.querySelector(".selected"):null;const options=dropdown?dropdown.querySelector(".options"):null;let toast=document.getElementById("country-toast");if(!toast){toast=document.createElement("div");toast.id="country-toast";document.body.appendChild(toast)}
-const url=new URL(window.location.href);const paramCountry=url.searchParams.get("country");const savedCountry=localStorage.getItem("Cntry");let activeCountry=null;function setActiveCountry(code,updateUrl=!0){if(!options)return;const li=options.querySelector(`li[data-value="${code}"]`);if(!li)return;activeCountry=code;localStorage.setItem("Cntry",code);if(selected)selected.innerHTML=li.innerHTML;if(updateUrl){url.searchParams.set("country",code);window.history.replaceState({},"",url)}}
-if(paramCountry){setActiveCountry(paramCountry)}else if(savedCountry){setActiveCountry(savedCountry)}else{setActiveCountry("SA")}
-if(selected&&dropdown&&options){selected.addEventListener("click",()=>{dropdown.classList.toggle("open");options.style.display=dropdown.classList.contains("open")?"block":"none"});options.addEventListener("click",(e)=>{const li=e.target.closest("li");if(!li)return;const countryCode=li.getAttribute("data-value");setActiveCountry(countryCode);showToast("تم اختيار: "+li.textContent.trim());setTimeout(()=>{window.location.reload()},500)});document.addEventListener("click",(e)=>{if(!dropdown.contains(e.target)){dropdown.classList.remove("open");options.style.display="none"}})}
-function showToast(msg){if(!toast)return;toast.textContent=msg;toast.classList.add("show");setTimeout(()=>{toast.classList.remove("show")},1000)}
-const canonical=document.createElement("link");canonical.rel="canonical";canonical.href=window.location.origin+window.location.pathname;document.head.appendChild(canonical);if(paramCountry){const robots=document.createElement("meta");robots.name="robots";robots.content="noindex";document.head.appendChild(robots)}
 
 
 // =================== Cart + SEO + User ID ===================
