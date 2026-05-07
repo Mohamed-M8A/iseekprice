@@ -261,57 +261,6 @@
 </footer>
 
 
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('shareModal');
-    const openBtn = document.getElementById('shareOpenBtn');
-    const closeBtn = document.getElementById('shareCloseBtn');
-
-    if (openBtn) {
-        openBtn.onclick = function() {
-            const url = encodeURIComponent(window.location.href);
-            const title = encodeURIComponent(document.title);
-            
-            const shareLinks = {
-                's-fb': `https://www.facebook.com/sharer.php?u=${url}`,
-                's-x': `https://x.com/intent/tweet?text=${title}&url=${url}`,
-                's-wa': `https://wa.me/?text=${title}%20${url}`,
-                's-tg': `https://t.me/share/url?url=${url}&text=${title}`,
-                's-pin': `https://pinterest.com/pin/create/button/?url=${url}&description=${title}`,
-                's-rd': `https://www.reddit.com/submit?url=${url}&title=${title}`,
-                's-em': `mailto:?subject=${title}&body=${url}`
-            };
-
-            for (const [className, link] of Object.entries(shareLinks)) {
-                const el = modal.querySelector(`.${className}`);
-                if (el) el.href = link;
-            }
-
-            modal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        };
-    }
-
-    if (closeBtn) {
-        closeBtn.onclick = function() {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        };
-    }
-
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-    };
-});
-</script>
-  
-
-  
-
 <!-- (JS LINKS) -->      
 <!-- (JS GENERAL LINKS) -->  
 <script defer src='/js/general/worker.js'></script>  
