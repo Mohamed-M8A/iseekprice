@@ -40,7 +40,7 @@
     }
 
     const topBar = document.getElementById('widget-topbar');
-    if (topBar) topBar.innerHTML = `<button id='widget-toggle-btn'>&#9776; الكل</button><div id='widget-desktop-cats'></div>`;
+    if (topBar) topBar.innerHTML = `<button id='widget-toggle-btn'>&#9776;</button><div id='widget-desktop-cats'></div>`;
 
     const sideBar = document.getElementById('widget-sidebar');
     if (sideBar) {
