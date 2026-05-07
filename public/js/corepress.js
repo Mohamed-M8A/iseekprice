@@ -53,21 +53,27 @@
     const htmlEl = document.documentElement;
     const darkBtn = document.getElementById("dark-toggler");
     function applyTheme(theme, persist) {
-        const iconUse = darkBtn ? darkBtn.querySelector("use") : null;
+    const iconUse = darkBtn ? darkBtn.querySelector("use") : null;
+    const iconPath = "/public/assets/static/icons.svg";
         if (theme === "dark") {
             htmlEl.classList.add("dark-mode");
             htmlEl.setAttribute("data-theme", "dark");
-            if (iconUse) iconUse.setAttribute("href", "#i-sun");
+            if (iconUse) iconUse.setAttribute("href", iconPath + "#i-sun");
         } else {
             htmlEl.classList.remove("dark-mode");
             htmlEl.setAttribute("data-theme", "light");
-            if (iconUse) iconUse.setAttribute("href", "#i-moon");
+            if (iconUse) iconUse.setAttribute("href", iconPath + "#i-moon");
         }
         if (persist) localStorage.setItem("theme", theme);
     }
     let savedTheme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     applyTheme(savedTheme, false);
-    if (darkBtn) darkBtn.addEventListener("click", e => { e.preventDefault(); applyTheme(htmlEl.classList.contains("dark-mode") ? "light" : "dark", true); });
+    if (darkBtn) {
+        darkBtn.addEventListener("click", e => {
+            e.preventDefault();
+            applyTheme(htmlEl.classList.contains("dark-mode") ? "light" : "dark", true);
+        });
+    }
 
     // 3. === Cart Logic ===
     function updateCartWidget() {
