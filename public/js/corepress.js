@@ -2,9 +2,9 @@
 
 (function injectAndInitializeHeader() {
     
-    // 1. === Injection Logic (HTML) ===
+    // 1. === Injection ===
     const logoWrap = document.getElementById('logo-wrap');
-    if (logoWrap) logoWrap.innerHTML = `<a href='/'><img alt='شعار الموقع' src='/assets/static/favicon.png'/></a>`;
+    if (logoWrap) logoWrap.innerHTML = `<a href='/'><img alt='شعار الموقع' src='/public/assets/static/favicon.png'/></a>`;
 
     const searchWrap = document.getElementById('search-wrap');
     if (searchWrap) {
@@ -20,21 +20,21 @@
     if (actionsWrap) {
         actionsWrap.innerHTML = `
             <div class='custom-dropdown' id='countryDropdown'>
-                <div class='selected'><img alt='السعودية' height='16' src='/assets/flags/sa.png' width='16'/> السعودية</div>
+                <div class='selected'><img alt='السعودية' height='16' src='/public/assets/flags/sa.png' width='16'/> السعودية</div>
                 <ul class='options'>
-                    <li data-value='SA'><img alt='السعودية' height='16' src='/assets/flags/sa.png' width='16'/> السعودية</li>
-                    <li data-value='AE'><img alt='الإمارات' height='16' src='/assets/flags/ae.png' width='16'/> الإمارات</li>
-                    <li data-value='OM'><img alt='عُمان' height='16' src='/assets/flags/om.png' width='16'/> عُمان</li>
-                    <li data-value='MA'><img alt='المغرب' height='16' src='/assets/flags/ma.png' width='16'/> المغرب</li>
-                    <li data-value='DZ'><img alt='الجزائر' height='16' src='/assets/flags/dz.png' width='16'/> الجزائر</li>
-                    <li data-value='TN'><img alt='تونس' height='16' src='/assets/flags/tn.png' width='16'/> تونس</li>
+                    <li data-value='SA'><img alt='السعودية' height='16' src='/public/assets/flags/sa.png' width='16'/> السعودية</li>
+                    <li data-value='AE'><img alt='الإمارات' height='16' src='/public/assets/flags/ae.png' width='16'/> الإمارات</li>
+                    <li data-value='OM'><img alt='عُمان' height='16' src='/public/assets/flags/om.png' width='16'/> عُمان</li>
+                    <li data-value='MA'><img alt='المغرب' height='16' src='/public/assets/flags/ma.png' width='16'/> المغرب</li>
+                    <li data-value='DZ'><img alt='الجزائر' height='16' src='/public/assets/flags/dz.png' width='16'/> الجزائر</li>
+                    <li data-value='TN'><img alt='تونس' height='16' src='/public/assets/flags/tn.png' width='16'/> تونس</li>
                 </ul>
             </div>
             <div class='dark-mode-toggle'>
-                <button aria-label='تبديل الوضع الليلي' id='dark-toggler'><svg class='icon'><use href='#i-moon'/></svg></button>
+                <button aria-label='تبديل الوضع الليلي' id='dark-toggler'><svg class='icon'><use href='/public/assets/static/icons.svg#i-moon'/></svg></button>
             </div>
             <div class='cart-widget' id='cart-widget-header'>
-                <span class='cart-icon'><svg class='icon'><use href='/assets/static/icons.svg#i-cart'/></svg></span>
+                <span class='cart-icon'><svg class='icon'><use href='/public/assets/static/icons.svg#i-cart'/></svg></span>
                 <span id='cart-count'>0</span>
             </div>`;
     }
@@ -124,19 +124,18 @@
 })();
 
 
-// =================== Cart + SEO + User ID ===================
+// =================== Cart + SEO + Back To Top ===================
 
 function showCartToast(m,t="success"){const h=document.createElement("div");document.body.prepend(h);const s=h.attachShadow({mode:"open"}),d=document.createElement("div");d.textContent=m;s.appendChild(d);const st=document.createElement("style");st.textContent=`div{position:fixed;top:20px;right:20px;min-width:220px;max-width:320px;background:${t==="error"?"#e74c3c":"#2ecc71"};color:white;font-family:sans-serif;font-size:14px;padding:12px 18px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.2);opacity:0;transform:translateX(120%);transition:all 0.4s ease;z-index:1000000;}div.show{opacity:1;transform:translateX(0);}`;s.appendChild(st);setTimeout(()=>d.classList.add("show"),50);setTimeout(()=>{d.classList.remove("show");setTimeout(()=>h.remove(),400)},3000)}
 function addToCart(id){if(!id){showCartToast("عذراً، لم يتم العثور على معرف المنتج!","error");return}let c=JSON.parse(localStorage.getItem("cart"))||[];if(c.some(i=>i.id===id)){showCartToast("المنتج موجود بالفعل في العربة!","error");return}c.push({id:id,timestamp:new Date().getTime()});localStorage.setItem("cart",JSON.stringify(c));window.dispatchEvent(new Event("cartUpdated"));showCartToast("تمت إضافة المنتج بنجاح!","success")}
 document.addEventListener("click",function(e){const b=e.target.closest(".external-cart-button");if(b){e.preventDefault();e.stopPropagation();const p=e.target.closest(".post-card");const id=p?p.querySelector(".UID")?.textContent.trim():null;addToCart(id)}const a=e.target.closest(".add-to-cart");if(a){e.preventDefault();e.stopPropagation();const u=document.querySelector(".UID");addToCart(u?u.textContent.trim():null)}});
 
-const UIDManager={generate(){const now=new Date();const datePart=now.getFullYear().toString()+(now.getMonth()+1).toString().padStart(2,'0')+now.getDate().toString().padStart(2,'0')+now.getHours().toString().padStart(2,'0')+now.getMinutes().toString().padStart(2,'0')+now.getSeconds().toString().padStart(2,'0');const randomPart=Math.random().toString(36).substring(2,10).toUpperCase();return `ID-${datePart}-${randomPart}`},getPersistentId(){let id=localStorage.getItem("user_fingerprint");if(!id){id=this.generate();localStorage.setItem("user_fingerprint",id)}
-return id}}
+(function(){const b=document.createElement('div');b.id='back-to-top';b.innerHTML=`<a aria-label='Back to Top' href='#top'><svg class='icon'><use xlink:href='#i-arrow-t'/></svg></a>`;document.body.appendChild(b);window.addEventListener('scroll',()=>{b.classList.toggle('show',window.scrollY>800)},{passive:true});b.addEventListener('click',(e)=>{e.preventDefault();window.scrollTo({top:0,behavior:'smooth'})})})();
 
 if(window.location.search.includes('m=1')){const url=new URL(window.location.href);url.searchParams.delete('m');window.history.replaceState({},'',url.pathname+url.search)}
 
 
-// =================== Share + Back To Top  ===================
+// =================== Share ===================
 
 document.addEventListener('DOMContentLoaded', function() {
     const pageUrl = encodeURIComponent(window.location.href);
@@ -160,8 +159,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.body.insertAdjacentHTML('beforeend',modalHTML);const modal=document.getElementById('shareModal'),openBtn=document.getElementById('shareOpenBtn'),closeBtn=document.getElementById('shareCloseBtn'),closeModal=function(){modal.style.display='none',document.body.style.overflow='auto'};if(openBtn)openBtn.onclick=function(){modal.style.display='block',document.body.style.overflow='hidden'};if(closeBtn)closeBtn.onclick=closeModal;window.onclick=function(e){if(e.target==modal)closeModal()};document.querySelectorAll('.share-btn').forEach(function(b){if(!b.classList.contains('s-em')&&!b.classList.contains('s-wa')){b.onclick=function(e){e.preventDefault(),window.open(this.href,'share-dialog','width=600,height=400')}}});
 });
                                                         
-(function(){const b=document.createElement('div');b.id='back-to-top';b.innerHTML=`<a aria-label='Back to Top' href='#top'><svg class='icon'><use xlink:href='#i-arrow-t'/></svg></a>`;document.body.appendChild(b);window.addEventListener('scroll',()=>{b.classList.toggle('show',window.scrollY>800)},{passive:true});b.addEventListener('click',(e)=>{e.preventDefault();window.scrollTo({top:0,behavior:'smooth'})})})();
 
 // =================== Track ===================
+
+const UIDManager={generate(){const now=new Date();const datePart=now.getFullYear().toString()+(now.getMonth()+1).toString().padStart(2,'0')+now.getDate().toString().padStart(2,'0')+now.getHours().toString().padStart(2,'0')+now.getMinutes().toString().padStart(2,'0')+now.getSeconds().toString().padStart(2,'0');const randomPart=Math.random().toString(36).substring(2,10).toUpperCase();return `ID-${datePart}-${randomPart}`},getPersistentId(){let id=localStorage.getItem("user_fingerprint");if(!id){id=this.generate();localStorage.setItem("user_fingerprint",id)}
+return id}}
+    
 
 (function(){const w="https://script.google.com/macros/s/AKfycbzs_7qOQB2gMEg7__XH-vXr6LD2OWCv4SFcJbTnDG3x-BcnKA6GACY_SS5eZXDqMYc41Q/exec";let a=["Entry"],e="Closed Tab/Direct",s=!1;setTimeout(()=>{const t=()=>(typeof UIDManager!='undefined'?UIDManager.getPersistentId():"Unknown"),r=n=>(n?n.replace("https://iseekprice.com","")||"/":""),o=()=>{const n=navigator.userAgent;return/Android/i.test(n)?"Android":/iPhone|iPad|iPod/i.test(n)?"iOS":/Win/i.test(n)?"Windows":/Mac/i.test(n)?"MacOS":"Linux/Other"},i=()=>{const n=navigator.userAgent.toLowerCase(),{width:c,height:g}=window.screen;let l=n.includes("edg")?"Edge":n.includes("opr")?"Opera":n.includes("chrome")?"Chrome":n.includes("firefox")?"Firefox":"Safari";return JSON.stringify({entryTime:new Date().toLocaleString('sv-SE'),visitorId:t(),action:a.join(" -> "),pageUrl:r(window.location.href),referrer:document.referrer||"Direct Search",exitDestination:e,os:o(),browser:l,screenRes:`${c}x${g}`})},d=()=>{if(s||a.length===0)return;const n=i();navigator.sendBeacon?navigator.sendBeacon(w,n):fetch(w,{method:'POST',body:n,keepalive:!0});s=!0};document.addEventListener("mousedown",n=>{const c=n.target.closest("a, .buy-button, .add-to-cart, .copy-button, .tab-buttons button");if(!c)return;if(c.tagName==="A"){if(c.href&&!c.href.includes("iseekprice.com")&&!c.href.startsWith("javascript")){e=c.href;if(!a.includes("Exit Click"))a.push("Exit Click")}}else{let g="";c.classList.contains("buy-button")?g="Buy":c.classList.contains("add-to-cart")?g="Cart":c.classList.contains("copy-button")?g="Coupon":g="T:"+c.innerText.trim().substring(0,10);if(g&&!a.includes(g))a.push(g)}});window.addEventListener("pagehide",d);window.addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()})},3500)})()
