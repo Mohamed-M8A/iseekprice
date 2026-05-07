@@ -138,7 +138,7 @@
         </ul>
       </div>
 
-      
+      <!-- Links -->
       <div class='footer-links'>
         <h3 class='footer-title'>اعرف أكثر</h3>
         <ul>
@@ -147,7 +147,7 @@
         </ul>
       </div>
 
-<!-- SCL Media Links -->
+      <!-- SCL Media Links -->
       <div class='footer-social-section'>
         <h3 class='footer-title'>تابعونا علي</h3>
         <div class='footer-social'>
@@ -180,8 +180,6 @@
       
     </div>
   </div>
-
-  <!-- Rights -->
   <div class='footer-bottom'>
     <p>&#169; 2024-2026 جميع الحقوق محفوظة لموقع iseekprice.com</p>
   </div>
@@ -189,23 +187,11 @@
 
 
 <!-- (JS LINKS) -->      
-<!-- (JS GENERAL LINKS) -->  
 <script defer src='/public/js/worker.js'></script>  
 <script defer src='/public/js/grid.js'></script>  
 <script defer src='/public/js/corepress.js'></script>    
 <script defer src='/public/js/search.js'></script>
-
-<script>
-  const path = window.location.pathname;
-  const urlParams = new URLSearchParams(window.location.search);
-
-  if (path.includes('/product/') || urlParams.has('id')) {
-    document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js"><\/script>');
     
-    document.write('<script defer src="/js/product/fetch.js"><\/script>');
-    document.write('<script defer src="/js/product/make.js"><\/script>');
-  }
-</script>
 
 <script type='text/javascript'>
   if ('serviceWorker' in navigator) {
@@ -217,7 +203,6 @@
   }
 </script>
   
-
 
 </body>
 </html>
