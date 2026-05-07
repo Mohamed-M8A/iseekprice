@@ -132,6 +132,69 @@
 })();
 
 
+// ===================  Footer ===================
+
+document.addEventListener("DOMContentLoaded", function() {
+    const footerHTML = `
+<footer id='footer' itemscope='itemscope' itemtype='https://schema.org/WPFooter'> 
+  <div class='footer-container'>
+    <div class='footer-row'>
+      
+      <div class='footer-links'>
+        <h3 class='footer-title'>عن الموقع</h3>
+        <ul>
+          <li><a href='https://www.iseekprice.com/p/about-us.html'>من نحن</a></li>
+          <li><a href='https://www.iseekprice.com/p/policy.html'>سياسة الموقع</a></li>
+          <li><a href='https://www.iseekprice.com/p/sitemap.html'>خريطة الموقع</a></li>
+          <li><a href='https://www.iseekprice.com/p/contact-us.html'>اتصل بنا</a></li>
+        </ul>
+      </div>
+
+      <div class='footer-links'>
+        <h3 class='footer-title'>اعرف أكثر</h3>
+        <ul>
+          <li><a href='https://www.iseekprice.com/p/blog.html'>المدونة</a></li>
+          <li><a href='https://www.iseekprice.com/p/iseekchat.html'>دردشة</a></li>
+        </ul>
+      </div>
+
+      <div class='footer-social-section'>
+        <h3 class='footer-title'>تابعونا علي</h3>
+        <div class='footer-social'>
+          <a aria-label='YouTube' href='https://www.youtube.com/@ISeekPrice' rel='noopener' target='_blank'>
+            <svg class='icon'><use href='/public/assets/static/icons.svg#i-youtube'/></svg>
+          </a>
+          <a aria-label='Pinterest' href='https://www.pinterest.com/ISeekPrice' rel='noopener' target='_blank'>
+            <svg class='icon'><use href='/public/assets/static/icons.svg#i-pinterest'/></svg>
+          </a>
+          <a aria-label='Facebook' href='https://www.facebook.com/profile.php?id=61579522981793' rel='noopener' target='_blank'>
+            <svg class='icon'><use href='/public/assets/static/icons.svg#i-facebook'/></svg>
+          </a>
+          <a aria-label='Instagram' href='https://www.instagram.com/iseekprice/' rel='noopener' target='_blank'>
+            <svg class='icon'><use href='/public/assets/static/icons.svg#i-instagram'/></svg>
+          </a>
+          <a aria-label='X' href='https://x.com/ISeekPrice' rel='noopener' target='_blank'>
+            <svg class='icon'><use href='/public/assets/static/icons.svg#i-x'/></svg>
+          </a>
+          <a aria-label='Telegram' href='https://t.me/+bmBnY0FumOwxZDQ0' rel='noopener' target='_blank'>
+            <svg class='icon'><use href='/public/assets/static/icons.svg#i-telegram'/></svg>
+          </a>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  <div class='footer-bottom'>
+    <p>&#169; 2024-2026 جميع الحقوق محفوظة لموقع iseekprice.com</p>
+  </div>
+</footer>`;
+
+    const target = document.getElementById('footer');
+    if (target) {
+        target.innerHTML = footerHTML;
+    }
+});
+
 // =================== Cart + Back To Top + Share ===================
 
 function showCartToast(m,t="success"){const h=document.createElement("div");document.body.prepend(h);const s=h.attachShadow({mode:"open"}),d=document.createElement("div");d.textContent=m;s.appendChild(d);const st=document.createElement("style");st.textContent=`div{position:fixed;top:20px;right:20px;min-width:220px;max-width:320px;background:${t==="error"?"#e74c3c":"#2ecc71"};color:white;font-family:sans-serif;font-size:14px;padding:12px 18px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.2);opacity:0;transform:translateX(120%);transition:all 0.4s ease;z-index:1000000;}div.show{opacity:1;transform:translateX(0);}`;s.appendChild(st);setTimeout(()=>d.classList.add("show"),50);setTimeout(()=>{d.classList.remove("show");setTimeout(()=>h.remove(),400)},3000)}
