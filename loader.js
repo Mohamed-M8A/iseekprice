@@ -54,6 +54,11 @@
                 <div id='post-body'>
                     <hr class='clean-divider'/>
                     <div id='souq-widget-root'></div>
+                    <hr class='clean-divider'/>
+                    <button id='shareOpenBtn' class='main-share-button'>
+                        <svg class="icon"><use href='/public/assets/static/icons.svg#i-share'/></svg>
+                        مشاركة هذا العرض
+                    </button>
                 </div>
             </article>`;
             
