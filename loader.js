@@ -5,6 +5,9 @@
 
     if (path === '/' || path === '/index.html' || path === '') return;
 
+    document.documentElement.lang = "ar";
+    document.documentElement.dir = "rtl";
+
     const injectScript = (src, async = false) => {
         const script = document.createElement('script');
         script.src = src;
@@ -29,7 +32,6 @@
     };
 
     if (path.includes('/product/') || path.includes('/pages/')) {
-        
         const headerHTML = `
         <header id='header' itemscope='itemscope' itemtype='https://schema.org/WPHeader'>
           <div class='header-main-row'>
