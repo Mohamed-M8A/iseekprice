@@ -2,7 +2,6 @@
 
 (function injectAndInitializeHeader() {
     
-    // 1. === Injection ===
     const logoWrap = document.getElementById('logo-wrap');
     if (logoWrap) logoWrap.innerHTML = `<a href='/'><img alt='شعار الموقع' src='/public/assets/static/favicon.png'/></a>`;
 
@@ -49,7 +48,8 @@
             <div id='widget-side-list'></div>`;
     }
 
-    // 2. === Dark Mode Logic ===
+
+    
     const htmlEl = document.documentElement;
     const darkBtn = document.getElementById("dark-toggler");
     function applyTheme(theme, persist) {
@@ -75,18 +75,19 @@
         });
     }
 
-    // 3. === Cart Logic ===
-    function updateCartWidget() {
-        const cart = JSON.parse(localStorage.getItem("cart")) || [];
-        const countEl = document.getElementById("cart-count");
-        if (countEl) { countEl.textContent = cart.length; cart.length > 0 ? countEl.classList.add("active") : countEl.classList.remove("active"); }
+
+    
+   function updateCartWidget() {
+   const cart = JSON.parse(localStorage.getItem("cart")) || [];
+   const countEl = document.getElementById("cart-count");
+   if (countEl) { countEl.textContent = cart.length; cart.length > 0 ? countEl.classList.add("active") : countEl.classList.remove("active"); }
     }
     updateCartWidget();
     window.addEventListener("cartUpdated", updateCartWidget);
     const cartBtn = document.getElementById("cart-widget-header");
     if (cartBtn) cartBtn.onclick = () => window.location.href = "/pages/main/cart.html";
 
-    // 4. === Country Switcher Logic ===
+
     const dropdown = document.getElementById("countryDropdown");
     const selected = dropdown ? dropdown.querySelector(".selected") : null;
     const options = dropdown ? dropdown.querySelector(".options") : null;
@@ -116,8 +117,9 @@
             window.location.reload();
         };
     }
+
+
     
-    // SEO (Canonical & Robots)
     const canonical = document.createElement("link");
     canonical.rel = "canonical";
     canonical.href = window.location.origin + window.location.pathname;
@@ -130,18 +132,13 @@
 })();
 
 
-// =================== Cart + SEO + Back To Top ===================
+// =================== Cart + Back To Top + Share ===================
 
 function showCartToast(m,t="success"){const h=document.createElement("div");document.body.prepend(h);const s=h.attachShadow({mode:"open"}),d=document.createElement("div");d.textContent=m;s.appendChild(d);const st=document.createElement("style");st.textContent=`div{position:fixed;top:20px;right:20px;min-width:220px;max-width:320px;background:${t==="error"?"#e74c3c":"#2ecc71"};color:white;font-family:sans-serif;font-size:14px;padding:12px 18px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.2);opacity:0;transform:translateX(120%);transition:all 0.4s ease;z-index:1000000;}div.show{opacity:1;transform:translateX(0);}`;s.appendChild(st);setTimeout(()=>d.classList.add("show"),50);setTimeout(()=>{d.classList.remove("show");setTimeout(()=>h.remove(),400)},3000)}
 function addToCart(id){if(!id){showCartToast("عذراً، لم يتم العثور على معرف المنتج!","error");return}let c=JSON.parse(localStorage.getItem("cart"))||[];if(c.some(i=>i.id===id)){showCartToast("المنتج موجود بالفعل في العربة!","error");return}c.push({id:id,timestamp:new Date().getTime()});localStorage.setItem("cart",JSON.stringify(c));window.dispatchEvent(new Event("cartUpdated"));showCartToast("تمت إضافة المنتج بنجاح!","success")}
 document.addEventListener("click",function(e){const b=e.target.closest(".external-cart-button");if(b){e.preventDefault();e.stopPropagation();const p=e.target.closest(".post-card");const id=p?p.querySelector(".UID")?.textContent.trim():null;addToCart(id)}const a=e.target.closest(".add-to-cart");if(a){e.preventDefault();e.stopPropagation();const u=document.querySelector(".UID");addToCart(u?u.textContent.trim():null)}});
 
 (function(){const b=document.createElement('div');b.id='back-to-top';b.innerHTML=`<a aria-label='Back to Top' href='#top'><svg class='icon'><use xlink:href='/public/assets/static/icons.svg#i-arrow-t'/></svg></a>`;document.body.appendChild(b);window.addEventListener('scroll',()=>{b.classList.toggle('show',window.scrollY>800)},{passive:true});b.addEventListener('click',(e)=>{e.preventDefault();window.scrollTo({top:0,behavior:'smooth'})})})();
-
-if(window.location.search.includes('m=1')){const url=new URL(window.location.href);url.searchParams.delete('m');window.history.replaceState({},'',url.pathname+url.search)}
-
-
-// =================== Share ===================
 
 document.addEventListener('DOMContentLoaded', function() {
     const pageUrl = encodeURIComponent(window.location.href);
