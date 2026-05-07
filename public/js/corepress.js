@@ -11,7 +11,7 @@
         searchWrap.innerHTML = `
             <form class='search-box-form' onsubmit='startSearch(); return false;'>
                 <input autocomplete='off' class='search-box-input' id='searchInput' placeholder='ابحث عن منتج...' type='text'/> 
-                <button class='search-box-button' type='submit'>بحث <svg class='icon'><use href='/assets/static/icons.svg#i-search'/></svg></button>
+                <button class='search-box-button' type='submit'>بحث <svg class='icon'><use href='/public/assets/static/icons.svg#i-search'/></svg></button>
             </form>
             <div class='search-history-dropdown' id='searchHistoryDropdown'></div>`;
     }
