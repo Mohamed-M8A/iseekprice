@@ -81,7 +81,7 @@ class Renderer {
                 ${badgeHTML}
                 <img class="post-image" alt="${product.title}" src="${this.placeholder}" data-src="${imageUrl}">
                 <div class="external-cart-button">
-                    <svg style="width:20px;height:20px;"><use xlink:href="/public/assets/static/icons.svg#i-cart"></use></svg>
+                    <svg class='icon'><use href='/public/assets/static/icons.svg#i-cart'/></svg>
                 </div>
             </div>
             <div class="post-content">
