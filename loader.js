@@ -29,20 +29,44 @@
     };
 
     if (path.includes('/product/') || path.includes('/pages/')) {
+        
+        const headerHTML = `
+        <header id='header' itemscope='itemscope' itemtype='https://schema.org/WPHeader'>
+          <div class='header-main-row'>
+            <div class='header-container'>
+              <div class='logo' id='logo-wrap'></div>
+              <div class='search-container' id='search-wrap'></div>
+              <div class='header-actions' id='actions-wrap'></div>
+            </div>
+          </div>
+          <nav id='widget-topbar'></nav>
+        </header>
+        <div id='widget-sidebar'></div>
+        <div id='widget-overlay'></div>`;
+
+        document.body.insertAdjacentHTML('afterbegin', headerHTML);
+
+        if (path.includes('/product/')) {
+            const productSkeleton = `
+            <article id='single-content'>
+                <div id='post-body'>
+                    <hr class='clean-divider'/>
+                    <div id='souq-widget-root'></div>
+                </div>
+            </article>`;
+            
+            const existingMain = document.querySelector('main');
+            if (existingMain) {
+                existingMain.insertAdjacentHTML('afterend', productSkeleton);
+            } else {
+                document.body.insertAdjacentHTML('beforeend', productSkeleton);
+            }
+        }
+
         document.title = "ISeekPrice - تتبع اسعار المنتجات ومقارنة العروض";
-        
-        injectMeta('name', 'description', 'قارن الأسعار بين المتاجر المختلفة، اكتشف أفضل العروض والخصومات، وتسوق أونلاين بذكاء. دليلك الشامل للأجهزة الذكية ومراجعات الأسعار فوريّة.');
-        injectMeta('name', 'verify-admitad', '7d7f763921');
-        injectMeta('name', 'p:domain_verify', '4444cdf2f0a49fb484bf404640ddbd44');
+        injectMeta('name', 'description', 'قارن الأسعار بين المتاجر المختلفة، اكتشف أفضل العروض والخصومات، وتسوق أونلاين بذكاء.');
         injectMeta('name', 'google-site-verification', 'zwgupH08YoN_WM-XihJynuANAqHUsnLDSSenbcTktc8');
-        
-        injectMeta('property', 'og:title', 'ISeekPrice - تتبع اسعار المنتجات');
-        injectMeta('property', 'og:description', 'قارن الأسعار واكتشف أفضل العروض والخصومات وتسوق أونلاين بذكاء.');
         injectMeta('property', 'og:image', origin + '/public/assets/banners/Iseekprice1.png');
-        injectMeta('property', 'og:url', window.location.href);
-        injectMeta('property', 'og:type', 'website');
-        injectMeta('name', 'twitter:card', 'summary_large_image');
-        injectMeta('name', 'twitter:site', '@ISeekPrice');
 
         injectLink('shortcut icon', origin + '/public/assets/static/favicon.ico', 'image/x-icon');
         injectLink('manifest', origin + '/manifest.json');
@@ -57,7 +81,6 @@
 
     if (path.includes('/product/')) {
         injectLink('stylesheet', origin + '/public/css/product.css');
-        
         const scripts = [
             '/public/js/fetch.js',
             '/public/js/make.js',
@@ -67,7 +90,6 @@
             '/public/js/search.js',
             '/public/js/chart.js'
         ];
-        
         scripts.forEach(src => injectScript(origin + src));
     } else if (path.includes('/pages/')) {
         injectScript(origin + '/public/js/corepress.js');
