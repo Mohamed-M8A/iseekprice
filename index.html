@@ -181,12 +181,14 @@
 <script defer src='/public/js/grid.js'></script>  
 <script defer src='/public/js/corepress.js'></script>    
 <script defer src='/public/js/search.js'></script>
+<script defer src='/public/js/chart.js'></script>  
+
     
 
 <script type='text/javascript'>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/js/general/sw.js')
+      navigator.serviceWorker.register('/public/js/sw.js')
         .then(reg => console.log('Service Worker Registered!', reg))
         .catch(err => console.error('Service Worker Failed!', err));
     });
