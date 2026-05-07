@@ -1,4 +1,66 @@
-// ===================  Country + SEO + User ID ===================
+// ===================  Header ===================
+
+(function injectAndInitializeHeader() {
+    
+    // === 1. Injection Logic ===
+    const logoWrap = document.getElementById('logo-wrap');
+    if (logoWrap) logoWrap.innerHTML = `<a href='/'><img alt='شعار الموقع' src='/assets/static/favicon.png'/></a>`;
+
+    const searchWrap = document.getElementById('search-wrap');
+    if (searchWrap) {
+        searchWrap.innerHTML = `
+            <form class='search-box-form' onsubmit='startSearch(); return false;'>
+                <input autocomplete='off' class='search-box-input' id='searchInput' placeholder='ابحث عن منتج...' type='text'/> 
+                <button class='search-box-button' type='submit'>بحث <svg class='icon'><use href='/assets/static/icons.svg#i-search'/></svg></button>
+            </form>
+            <div class='search-history-dropdown' id='searchHistoryDropdown'></div>`;
+    }
+
+    const actionsWrap = document.getElementById('actions-wrap');
+    if (actionsWrap) {
+        actionsWrap.innerHTML = `
+            <div class='custom-dropdown' id='countryDropdown'>
+                <div class='selected'><img alt='السعودية' height='16' src='/assets/flags/sa.png' width='16'/> السعودية</div>
+                <ul class='options'>
+                    <li data-value='SA'><img alt='السعودية' height='16' src='/public/assets/flags/sa.png' width='16'/> السعودية</li>
+                    <li data-value='AE'><img alt='الإمارات' height='16' src='/public/assets/flags/ae.png' width='16'/> الإمارات</li>
+                    <li data-value='OM'><img alt='عُمان' height='16' src='/public/assets/flags/om.png' width='16'/> عُمان</li>
+                    <li data-value='MA'><img alt='المغرب' height='16' src='/public/assets/flags/ma.png' width='16'/> المغرب</li>
+                    <li data-value='DZ'><img alt='الجزائر' height='16' src='/public/assets/flags/dz.png' width='16'/> الجزائر</li>
+                    <li data-value='TN'><img alt='تونس' height='16' src='/public/assets/flags/tn.png' width='16'/> تونس</li>
+                </ul>
+            </div>
+            <div class='dark-mode-toggle'>
+                <button aria-label='تبديل الوضع الليلي' id='dark-toggler'><svg class='icon'><use href='#i-moon'/></svg></button>
+            </div>
+            <div class='cart-widget' id='cart-widget-header'>
+                <span class='cart-icon'><svg class='icon'><use href='/assets/static/icons.svg#i-cart'/></svg></span>
+                <span id='cart-count'>0</span>
+            </div>`;
+    }
+
+    const topBar = document.getElementById('widget-topbar');
+    if (topBar) topBar.innerHTML = `<button id='widget-toggle-btn'>&#9776; الكل</button><div id='widget-desktop-cats'></div>`;
+
+    const sideBar = document.getElementById('widget-sidebar');
+    if (sideBar) {
+        sideBar.innerHTML = `
+            <div id='widget-header-bar'><span id='widget-sidebar-title'>التصنيفات</span><button id='widget-close-btn'>&#10006;</button></div>
+            <div id='widget-side-list'></div>`;
+    }
+
+    // === 2. Dark Mode ===
+    const htmlEl=document.documentElement;const darkBtn=document.getElementById("dark-toggler");function applyTheme(theme,persist){const iconUse=darkBtn?darkBtn.querySelector("use"):null;if(theme==="dark"){htmlEl.classList.add("dark-mode");htmlEl.setAttribute("data-theme","dark");if(iconUse)iconUse.setAttribute("href","#i-sun")}else{htmlEl.classList.remove("dark-mode");htmlEl.setAttribute("data-theme","light");if(iconUse)iconUse.setAttribute("href","#i-moon")}if(persist)localStorage.setItem("theme",theme)}
+    let savedTheme=localStorage.getItem("theme")||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");applyTheme(savedTheme,false);if(darkBtn){darkBtn.addEventListener("click",function(event){event.preventDefault();const isDark=htmlEl.classList.contains("dark-mode");applyTheme(isDark?"light":"dark",true)})}
+
+    // === 3. Cart Widget ===
+    function updateCartWidget(){const cart=JSON.parse(localStorage.getItem("cart"))||[];const cartCountElement=document.getElementById("cart-count");if(!cartCountElement)return;cartCountElement.textContent=cart.length;if(cart.length>0){cartCountElement.classList.add("active")}else{cartCountElement.classList.remove("active")}}
+    updateCartWidget();window.addEventListener("storage",function(event){if(event.key==="cart"){updateCartWidget()}});window.addEventListener("cartUpdated",updateCartWidget);const cartWidget=document.getElementById("cart-widget-header");if(cartWidget){cartWidget.addEventListener("click",function(){window.location.href="/pages/main/cart.html"})}
+
+})();
+
+    // === 4. Country ===
+
 const dropdown=document.getElementById("countryDropdown");const selected=dropdown?dropdown.querySelector(".selected"):null;const options=dropdown?dropdown.querySelector(".options"):null;let toast=document.getElementById("country-toast");if(!toast){toast=document.createElement("div");toast.id="country-toast";document.body.appendChild(toast)}
 const url=new URL(window.location.href);const paramCountry=url.searchParams.get("country");const savedCountry=localStorage.getItem("Cntry");let activeCountry=null;function setActiveCountry(code,updateUrl=!0){if(!options)return;const li=options.querySelector(`li[data-value="${code}"]`);if(!li)return;activeCountry=code;localStorage.setItem("Cntry",code);if(selected)selected.innerHTML=li.innerHTML;if(updateUrl){url.searchParams.set("country",code);window.history.replaceState({},"",url)}}
 if(paramCountry){setActiveCountry(paramCountry)}else if(savedCountry){setActiveCountry(savedCountry)}else{setActiveCountry("SA")}
@@ -6,20 +68,20 @@ if(selected&&dropdown&&options){selected.addEventListener("click",()=>{dropdown.
 function showToast(msg){if(!toast)return;toast.textContent=msg;toast.classList.add("show");setTimeout(()=>{toast.classList.remove("show")},1000)}
 const canonical=document.createElement("link");canonical.rel="canonical";canonical.href=window.location.origin+window.location.pathname;document.head.appendChild(canonical);if(paramCountry){const robots=document.createElement("meta");robots.name="robots";robots.content="noindex";document.head.appendChild(robots)}
 
-if(window.location.search.includes('m=1')){const url=new URL(window.location.href);url.searchParams.delete('m');window.history.replaceState({},'',url.pathname+url.search)}
 
-const UIDManager={generate(){const now=new Date();const datePart=now.getFullYear().toString()+(now.getMonth()+1).toString().padStart(2,'0')+now.getDate().toString().padStart(2,'0')+now.getHours().toString().padStart(2,'0')+now.getMinutes().toString().padStart(2,'0')+now.getSeconds().toString().padStart(2,'0');const randomPart=Math.random().toString(36).substring(2,10).toUpperCase();return `ID-${datePart}-${randomPart}`},getPersistentId(){let id=localStorage.getItem("user_fingerprint");if(!id){id=this.generate();localStorage.setItem("user_fingerprint",id)}
-return id}}
-
-// =================== Cart ===================
-function updateCartWidget(){const cart=JSON.parse(localStorage.getItem("cart"))||[];const cartCountElement=document.getElementById("cart-count");if(!cartCountElement)return;cartCountElement.textContent=cart.length;if(cart.length>0){cartCountElement.classList.add("active")}else{cartCountElement.classList.remove("active")}}
-updateCartWidget();window.addEventListener("storage",function(event){if(event.key==="cart"){updateCartWidget()}});window.addEventListener("cartUpdated",updateCartWidget);const cartWidget=document.getElementById("cart-widget-header");if(cartWidget){cartWidget.addEventListener("click",function(){window.location.href="/p/cart.html"})}
+// =================== Cart + SEO + User ID ===================
 
 function showCartToast(m,t="success"){const h=document.createElement("div");document.body.prepend(h);const s=h.attachShadow({mode:"open"}),d=document.createElement("div");d.textContent=m;s.appendChild(d);const st=document.createElement("style");st.textContent=`div{position:fixed;top:20px;right:20px;min-width:220px;max-width:320px;background:${t==="error"?"#e74c3c":"#2ecc71"};color:white;font-family:sans-serif;font-size:14px;padding:12px 18px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.2);opacity:0;transform:translateX(120%);transition:all 0.4s ease;z-index:1000000;}div.show{opacity:1;transform:translateX(0);}`;s.appendChild(st);setTimeout(()=>d.classList.add("show"),50);setTimeout(()=>{d.classList.remove("show");setTimeout(()=>h.remove(),400)},3000)}
 function addToCart(id){if(!id){showCartToast("عذراً، لم يتم العثور على معرف المنتج!","error");return}let c=JSON.parse(localStorage.getItem("cart"))||[];if(c.some(i=>i.id===id)){showCartToast("المنتج موجود بالفعل في العربة!","error");return}c.push({id:id,timestamp:new Date().getTime()});localStorage.setItem("cart",JSON.stringify(c));window.dispatchEvent(new Event("cartUpdated"));showCartToast("تمت إضافة المنتج بنجاح!","success")}
 document.addEventListener("click",function(e){const b=e.target.closest(".external-cart-button");if(b){e.preventDefault();e.stopPropagation();const p=e.target.closest(".post-card");const id=p?p.querySelector(".UID")?.textContent.trim():null;addToCart(id)}const a=e.target.closest(".add-to-cart");if(a){e.preventDefault();e.stopPropagation();const u=document.querySelector(".UID");addToCart(u?u.textContent.trim():null)}});
 
-// =================== Share + DM + Back To Top  ===================
+const UIDManager={generate(){const now=new Date();const datePart=now.getFullYear().toString()+(now.getMonth()+1).toString().padStart(2,'0')+now.getDate().toString().padStart(2,'0')+now.getHours().toString().padStart(2,'0')+now.getMinutes().toString().padStart(2,'0')+now.getSeconds().toString().padStart(2,'0');const randomPart=Math.random().toString(36).substring(2,10).toUpperCase();return `ID-${datePart}-${randomPart}`},getPersistentId(){let id=localStorage.getItem("user_fingerprint");if(!id){id=this.generate();localStorage.setItem("user_fingerprint",id)}
+return id}}
+
+if(window.location.search.includes('m=1')){const url=new URL(window.location.href);url.searchParams.delete('m');window.history.replaceState({},'',url.pathname+url.search)}
+
+
+// =================== Share + Back To Top  ===================
 
 document.addEventListener('DOMContentLoaded', function() {
     const pageUrl = encodeURIComponent(window.location.href);
@@ -43,9 +105,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.body.insertAdjacentHTML('beforeend',modalHTML);const modal=document.getElementById('shareModal'),openBtn=document.getElementById('shareOpenBtn'),closeBtn=document.getElementById('shareCloseBtn'),closeModal=function(){modal.style.display='none',document.body.style.overflow='auto'};if(openBtn)openBtn.onclick=function(){modal.style.display='block',document.body.style.overflow='hidden'};if(closeBtn)closeBtn.onclick=closeModal;window.onclick=function(e){if(e.target==modal)closeModal()};document.querySelectorAll('.share-btn').forEach(function(b){if(!b.classList.contains('s-em')&&!b.classList.contains('s-wa')){b.onclick=function(e){e.preventDefault(),window.open(this.href,'share-dialog','width=600,height=400')}}});
 });
                                                         
-var htmlEl=document.documentElement,darkBtn=document.getElementById("dark-toggler"),iconUse=darkBtn ? darkBtn.querySelector("use") :null;function switchIcon(theme){if(!iconUse) return;if(theme==="dark"){iconUse.setAttribute("xlink:href","#i-sun");iconUse.setAttribute("href","#i-sun")}else{iconUse.setAttribute("xlink:href","#i-moon");iconUse.setAttribute("href","#i-moon")}}function applyTheme(theme,persist){if(theme==="dark"){htmlEl.classList.add("dark-mode");htmlEl.setAttribute("data-theme","dark")}else{htmlEl.classList.remove("dark-mode");htmlEl.setAttribute("data-theme","light")}switchIcon(theme);if(persist){try{localStorage.setItem("theme",theme)}catch(e){}}}var savedTheme;try{savedTheme=localStorage.getItem("theme")}catch(e){savedTheme=null}if(!savedTheme){savedTheme=window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark":"light"}applyTheme(savedTheme,false);if(darkBtn){darkBtn.addEventListener("click",function(e){e.preventDefault();var isDark=htmlEl.classList.contains("dark-mode");applyTheme(isDark ? "light":"dark",true)})}
-
 (function(){const b=document.createElement('div');b.id='back-to-top';b.innerHTML=`<a aria-label='Back to Top' href='#top'><svg class='icon'><use xlink:href='#i-arrow-t'/></svg></a>`;document.body.appendChild(b);window.addEventListener('scroll',()=>{b.classList.toggle('show',window.scrollY>800)},{passive:true});b.addEventListener('click',(e)=>{e.preventDefault();window.scrollTo({top:0,behavior:'smooth'})})})();
 
 // =================== Track ===================
+
 (function(){const w="https://script.google.com/macros/s/AKfycbzs_7qOQB2gMEg7__XH-vXr6LD2OWCv4SFcJbTnDG3x-BcnKA6GACY_SS5eZXDqMYc41Q/exec";let a=["Entry"],e="Closed Tab/Direct",s=!1;setTimeout(()=>{const t=()=>(typeof UIDManager!='undefined'?UIDManager.getPersistentId():"Unknown"),r=n=>(n?n.replace("https://iseekprice.com","")||"/":""),o=()=>{const n=navigator.userAgent;return/Android/i.test(n)?"Android":/iPhone|iPad|iPod/i.test(n)?"iOS":/Win/i.test(n)?"Windows":/Mac/i.test(n)?"MacOS":"Linux/Other"},i=()=>{const n=navigator.userAgent.toLowerCase(),{width:c,height:g}=window.screen;let l=n.includes("edg")?"Edge":n.includes("opr")?"Opera":n.includes("chrome")?"Chrome":n.includes("firefox")?"Firefox":"Safari";return JSON.stringify({entryTime:new Date().toLocaleString('sv-SE'),visitorId:t(),action:a.join(" -> "),pageUrl:r(window.location.href),referrer:document.referrer||"Direct Search",exitDestination:e,os:o(),browser:l,screenRes:`${c}x${g}`})},d=()=>{if(s||a.length===0)return;const n=i();navigator.sendBeacon?navigator.sendBeacon(w,n):fetch(w,{method:'POST',body:n,keepalive:!0});s=!0};document.addEventListener("mousedown",n=>{const c=n.target.closest("a, .buy-button, .add-to-cart, .copy-button, .tab-buttons button");if(!c)return;if(c.tagName==="A"){if(c.href&&!c.href.includes("iseekprice.com")&&!c.href.startsWith("javascript")){e=c.href;if(!a.includes("Exit Click"))a.push("Exit Click")}}else{let g="";c.classList.contains("buy-button")?g="Buy":c.classList.contains("add-to-cart")?g="Cart":c.classList.contains("copy-button")?g="Coupon":g="T:"+c.innerText.trim().substring(0,10);if(g&&!a.includes(g))a.push(g)}});window.addEventListener("pagehide",d);window.addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()})},3500)})()
