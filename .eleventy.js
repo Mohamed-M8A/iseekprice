@@ -6,6 +6,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("src/sitemap.xml");
 
   return {
+    htmlTemplateEngine: "njk", 
     dir: {
       input: "src",
       output: "_site"
