@@ -8,85 +8,85 @@
     document.documentElement.lang = "ar";
     document.documentElement.dir = "rtl";
 
-    const injectLink = (rel, href) => {
-        const link = document.createElement('link');
-        link.rel = rel;
-        link.href = href;
-        head.appendChild(link);
+    const content = document.body.innerHTML;
+    document.body.innerHTML = "";
+
+    const injectScript = (src, isAsync = false) => {
+        const s = document.createElement('script');
+        s.src = src;
+        if (isAsync) s.async = true;
+        else s.defer = true;
+        head.appendChild(s);
     };
 
-    const injectScript = (src) => {
-        const script = document.createElement('script');
-        script.src = origin + src;
-        script.defer = true;
-        head.appendChild(script);
+    const injectLink = (rel, href, type = '') => {
+        const l = document.createElement('link');
+        l.rel = rel;
+        l.href = href;
+        if (type) l.type = type;
+        head.appendChild(l);
     };
 
     const injectMeta = (attr, val, content) => {
-        const meta = document.createElement('meta');
-        meta.setAttribute(attr, val);
-        meta.setAttribute('content', content);
-        head.appendChild(meta);
+        const m = document.createElement('meta');
+        m.setAttribute(attr, val);
+        m.setAttribute('content', content);
+        head.appendChild(m);
     };
 
-    if (path.includes('/product/') || path.includes('/pages/')) {
-        const headerHTML = `
-        <header id='header' itemscope='itemscope' itemtype='https://schema.org/WPHeader'>
-          <div class='header-main-row'>
-            <div class='header-container'>
-              <div class='logo' id='logo-wrap'></div>
-              <div class='search-container' id='search-wrap'></div>
-              <div class='header-actions' id='actions-wrap'></div>
-            </div>
-          </div>
-          <nav id='widget-topbar'></nav>
-        </header>`;
-        
-        const footerHTML = `
-        <footer id="footer-wrap">
-            <div id="footer"></div>
-        </footer>
-        <div id='widget-sidebar'></div>
-        <div id='widget-overlay'></div>`;
+    const headerHTML = `
+    <header id='header' itemscope='itemscope' itemtype='https://schema.org/WPHeader'>
+      <div class='header-main-row'>
+        <div class='header-container'>
+          <div class='logo' id='logo-wrap'></div>
+          <div class='search-container' id='search-wrap'></div>
+          <div class='header-actions' id='actions-wrap'></div>
+        </div>
+      </div>
+      <nav id='widget-topbar'></nav>
+    </header>`;
 
-        const primary = document.createElement('div');
-        primary.id = 'primary';
-        const main = document.createElement('main');
-        
-        const existingNodes = Array.from(document.body.childNodes);
-        existingNodes.forEach(node => main.appendChild(node));
-        
-        const souqRoot = document.createElement('div');
-        souqRoot.id = 'souq-widget-root';
-        main.appendChild(souqRoot);
-        
-        primary.appendChild(main);
-        
-        document.body.innerHTML = '';
-        document.body.insertAdjacentHTML('afterbegin', headerHTML);
-        document.body.appendChild(primary);
-        document.body.insertAdjacentHTML('beforeend', footerHTML);
+    const primaryHTML = `
+    <div id='primary'>
+      <main>
+        ${content}
+        <div id='souq-widget-root'></div>
+        <hr class='clean-divider'/>
+        <button id='shareOpenBtn' class='main-share-button'>مشاركة هذا العرض</button>
+      </main>
+    </div>`;
 
-        if (path.includes('/product/')) {
-            const shareBtn = `
-            <button id='shareOpenBtn' class='main-share-button'>
-                مشاركة هذا العرض
-            </button>`;
-            main.insertAdjacentHTML('beforeend', shareBtn);
-        }
+    const footerHTML = `
+    <div id="footer"></div>
+    <div id='widget-sidebar'></div>
+    <div id='widget-overlay'></div>`;
 
-        injectMeta('name', 'google-site-verification', 'zwgupH08YoN_WM-XihJynuANAqHUsnLDSSenbcTktc8');
-        injectMeta('property', 'og:image', origin + '/public/assets/banners/Iseekprice1.png');
-        injectLink('shortcut icon', origin + '/public/assets/static/favicon.ico');
-        injectLink('stylesheet', origin + '/public/css/main.css');
+    document.body.insertAdjacentHTML('afterbegin', headerHTML);
+    document.body.insertAdjacentHTML('beforeend', primaryHTML);
+    document.body.insertAdjacentHTML('beforeend', footerHTML);
 
-        injectScript('/public/js/gtag.js'); 
-    }
+    document.title = "ISeekPrice - تتبع اسعار المنتجات ومقارنة العروض";
+    injectMeta('name', 'description', 'قارن الأسعار بين المتاجر المختلفة، اكتشف أفضل العروض والخصومات، وتسوق أونلاين بذكاء.');
+    injectMeta('name', 'google-site-verification', 'zwgupH08YoN_WM-XihJynuANAqHUsnLDSSenbcTktc8');
+    injectMeta('property', 'og:image', origin + '/public/assets/banners/Iseekprice1.png');
+    injectMeta('property', 'og:type', 'website');
+    injectMeta('property', 'og:locale', 'ar');
+
+    injectLink('shortcut icon', origin + '/public/assets/static/favicon.ico', 'image/x-icon');
+    injectLink('manifest', origin + '/manifest.json');
+    injectLink('stylesheet', 'https://fonts.googleapis.com/css2?family=Cairo:wght@900&display=swap');
+    injectLink('stylesheet', origin + '/public/css/main.css');
+
+    injectScript('https://www.googletagmanager.com/gtag/js?id=G-FRWKEMXVYT', true);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FRWKEMXVYT');
 
     if (path.includes('/product/')) {
         injectLink('stylesheet', origin + '/public/css/product.css');
-        const scripts = [
-            '/public/js/chart.js',
+        const productScripts = [
+            'https://cdn.jsdelivr.net/npm/chart.js',
             '/public/js/fetch.js',
             '/public/js/make.js',
             '/public/js/worker.js',
@@ -94,9 +94,12 @@
             '/public/js/corepress.js',
             '/public/js/search.js'
         ];
-        scripts.forEach(src => injectScript(src));
+        productScripts.forEach(src => {
+            const finalSrc = src.startsWith('http') ? src : origin + src;
+            injectScript(finalSrc);
+        });
     } else if (path.includes('/pages/')) {
-        injectScript('/public/js/search.js');
-        injectScript('/public/js/corepress.js');
+        injectScript(origin + '/public/js/search.js');
+        injectScript(origin + '/public/js/corepress.js');
     }
 })();
