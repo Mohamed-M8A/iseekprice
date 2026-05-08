@@ -29,22 +29,23 @@ class Renderer {
         return parseFloat(val).toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
 
-    static toBase64URL(bytes) {
-        let lastIndex = bytes.length - 1;
-        while (lastIndex >= 0 && bytes[lastIndex] === 0) lastIndex--;
-        const cleanBytes = bytes.slice(0, lastIndex + 1);
-        return btoa(String.fromCharCode(...cleanBytes))
-            .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    getDatePath(offset) {
+        const d = new Date(Date.UTC(2025, 0, 1) + (offset * 86400000));
+        const y = d.getUTCFullYear();
+        const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(d.getUTCDate()).padStart(2, '0');
+        return `${y}/${m}/${day}`;
     }
 
     createCard(product, domain, feed) {
         if (!product) return null;
         const card = document.createElement("a");
-        card.href = domain + product.path;
+        card.href = `${domain}product/${product.slug}/`;
         card.className = "post-card title-link";
         const symbol = this.currencyConfig.symbol;
-        const slug = Renderer.toBase64URL(product.imgSlug);
-        const imageUrl = `https://blogger.googleusercontent.com/img/b/R29vZ2xl/${slug}/w220-h220/p.webp`;
+        
+        const datePath = this.getDatePath(product.dateOffset);
+        const imageUrl = `https://media.iseekprice.com/${datePath}/${product.id}_1.webp`;
         
         let badgeHTML = '', metaHTML = '';
         if (feed) {
