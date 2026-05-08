@@ -1,6 +1,5 @@
 (function smartLoader() {
     const path = window.location.pathname;
-    const head = document.head;
     const origin = window.location.origin;
 
     if (path === '/' || path === '/index.html' || path === '') return;
@@ -8,30 +7,15 @@
     document.documentElement.lang = "ar";
     document.documentElement.dir = "rtl";
 
-    const content = document.body.innerHTML;
+    const originalBodyContent = document.body.innerHTML;
     document.body.innerHTML = "";
 
-    const injectScript = (src, isAsync = false) => {
-        const s = document.createElement('script');
-        s.src = src;
-        if (isAsync) s.async = true;
-        else s.defer = true;
-        head.appendChild(s);
-    };
-
-    const injectLink = (rel, href, type = '') => {
-        const l = document.createElement('link');
-        l.rel = rel;
-        l.href = href;
-        if (type) l.type = type;
-        head.appendChild(l);
-    };
-
-    const injectMeta = (attr, val, content) => {
-        const m = document.createElement('meta');
-        m.setAttribute(attr, val);
-        m.setAttribute('content', content);
-        head.appendChild(m);
+    const head = document.head;
+    const inject = (type, attrs) => {
+        const el = document.createElement(type);
+        Object.assign(el, attrs);
+        if (type === 'script') el.defer = true;
+        head.appendChild(el);
     };
 
     const headerHTML = `
@@ -48,12 +32,19 @@
 
     const primaryHTML = `
     <div id='primary'>
-      <main>
-        ${content}
-        <div id='souq-widget-root'></div>
+      <article id='single-content'>
+        <div id='post-body'>
+          <hr class='clean-divider'/>
+          <main>${originalBodyContent}</main>
+        </div>
         <hr class='clean-divider'/>
-        <button id='shareOpenBtn' class='main-share-button'>مشاركة هذا العرض</button>
-      </main>
+        <div class='share-box-wrap'>
+            <button id='shareOpenBtn' class='main-share-button'>مشاركة مع الاصدقاء</button>
+        </div>
+        <hr class='clean-divider'/>
+        <p>عروض ستعجبك</p>
+        <div id='souq-widget-root'></div>
+      </article>
     </div>`;
 
     const footerHTML = `
@@ -65,41 +56,23 @@
     document.body.insertAdjacentHTML('beforeend', primaryHTML);
     document.body.insertAdjacentHTML('beforeend', footerHTML);
 
-    document.title = "ISeekPrice - تتبع اسعار المنتجات ومقارنة العروض";
-    injectMeta('name', 'description', 'قارن الأسعار بين المتاجر المختلفة، اكتشف أفضل العروض والخصومات، وتسوق أونلاين بذكاء.');
-    injectMeta('name', 'google-site-verification', 'zwgupH08YoN_WM-XihJynuANAqHUsnLDSSenbcTktc8');
-    injectMeta('property', 'og:image', origin + '/public/assets/banners/Iseekprice1.png');
-    injectMeta('property', 'og:type', 'website');
-    injectMeta('property', 'og:locale', 'ar');
-
-    injectLink('shortcut icon', origin + '/public/assets/static/favicon.ico', 'image/x-icon');
-    injectLink('manifest', origin + '/manifest.json');
-    injectLink('stylesheet', 'https://fonts.googleapis.com/css2?family=Cairo:wght@900&display=swap');
-    injectLink('stylesheet', origin + '/public/css/main.css');
-
-    injectScript('https://www.googletagmanager.com/gtag/js?id=G-FRWKEMXVYT', true);
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-FRWKEMXVYT');
-
+    inject('link', { rel: 'stylesheet', href: origin + '/public/css/main.css' });
+    
     if (path.includes('/product/')) {
-        injectLink('stylesheet', origin + '/public/css/product.css');
-        const productScripts = [
+        inject('link', { rel: 'stylesheet', href: origin + '/public/css/product.css' });
+        
+        const scripts = [
             'https://cdn.jsdelivr.net/npm/chart.js',
-            '/public/js/fetch.js',
-            '/public/js/make.js',
-            '/public/js/worker.js',
-            '/public/js/grid.js',
-            '/public/js/corepress.js',
-            '/public/js/search.js'
+            origin + '/public/js/fetch.js',
+            origin + '/public/js/make.js',
+            origin + '/public/js/worker.js',
+            origin + '/public/js/grid.js',
+            origin + '/public/js/corepress.js',
+            origin + '/public/js/search.js'
         ];
-        productScripts.forEach(src => {
-            const finalSrc = src.startsWith('http') ? src : origin + src;
-            injectScript(finalSrc);
-        });
-    } else if (path.includes('/pages/')) {
-        injectScript(origin + '/public/js/search.js');
-        injectScript(origin + '/public/js/corepress.js');
+        scripts.forEach(src => inject('script', { src }));
+    } else {
+        inject('script', { src: origin + '/public/js/corepress.js' });
+        inject('script', { src: origin + '/public/js/search.js' });
     }
 })();
