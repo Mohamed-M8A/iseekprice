@@ -85,7 +85,7 @@
     updateCartWidget();
     window.addEventListener("cartUpdated", updateCartWidget);
     const cartBtn = document.getElementById("cart-widget-header");
-    if (cartBtn) cartBtn.onclick = () => window.location.href = "/pages/main/cart.html";
+    if (cartBtn) cartBtn.onclick = () => window.location.href = "/pages/main/cart/";
 
 
     const dropdown = document.getElementById("countryDropdown");
