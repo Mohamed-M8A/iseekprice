@@ -21,7 +21,7 @@ createModal();const modal=document.getElementById("imageModal");const modalImage
 
 //  Customer IMG 
 
-const avatarURL="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgwYjQ3P3sS7yC15Dqs4gAPU3sEGpftVMbqMLwaUbIk5lgxsDIxG5LseYewSYgx9ugKh5wI8ZvMZL_Oh2qZd6FD6lvHbSenXP148Iy3AHvflDx8cO6ysEGc3_nOjv4wbs9USnFA2qdgIvy-WX_ybSngrHNRqpuMSACdhRX19hoQztPYC70WNNpU8zEd/w200-h200/6VBx3io.png";document.querySelectorAll(".avatar-placeholder").forEach(placeholder=>{const img=document.createElement("img");img.src=avatarURL;img.alt="أفاتار";img.className="reviewer-img";placeholder.appendChild(img)})
+const avatarURL="/public/assets/static/Client.png";document.querySelectorAll(".avatar-placeholder").forEach(placeholder=>{const img=document.createElement("img");img.src=avatarURL;img.alt="أفاتار";img.className="reviewer-img";placeholder.appendChild(img)})
 
 
 // =================== Tabs ===================
@@ -234,7 +234,7 @@ window.injectData = function(data) {
                 const saveAmount = savingEl.querySelector(".save-amount");
                 if (saveAmount && !saveAmount.querySelector(".fire-gif")) {
                     const fireGif = document.createElement("img");
-                    fireGif.src = "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj5J9EL4a9cV3VWmcK1ZYD6OYEB-1APv9gggocpaa7jAJXdgvX8Q7QiaAZC9NxcN25f8MTRSYD6SKwT1LSjL0SB1ovJH1SSkRmqH2y3f1NzWGkC0BE-gpj5bTc1OKi3Rfzh44sAAJSvOS5uq7Ut9ETN-V9LgKim0dkmEVmqUWa-2ZGA7FvMAYrVaJgn/w199-h200/fire%20(1).gif";
+                    fireGif.src = "/public/assets/static/fire.gif";
                     fireGif.style.cssText = "width:20px; vertical-align:middle; margin-left:5px;";
                     fireGif.classList.add("fire-gif");
                     saveAmount.appendChild(fireGif);
@@ -301,8 +301,8 @@ window.injectData = function(data) {
         const storeData = { name: data.storeName, aff: data.storeAffCode || "" };
         localStorage.setItem(storeKey, JSON.stringify(storeData));
 
-        const storeLink = `/p/store.html?store=${data.storeId}`;
-        const defaultImg = "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiwyg94bd89-ILQ8wlX5_Zvu31hLoGcooTyvF5kr88-uCv9QCZOEBDBVycAMDaerf2nnW9TB1EZdoJcmDS641L5ZsDMPFC8p3csM2jTsm8mP_ue_G1A6W5Cn-bohNUkDTU60v-AA5EAFaXceHJF99RzCNWAfvtzui1nitecMqZa2DA/s1600/17d3d08b-825f-43c8-814f-72b91d3a8c8c.png";
+        const storeLink = `/pages/main/store?store=${data.storeId}`;
+        const defaultImg = "/public/assets/static/Store.webp";
         
         storeWrapper.innerHTML = `
             <div class="bar">
