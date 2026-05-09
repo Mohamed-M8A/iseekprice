@@ -43,13 +43,12 @@ class BinaryParser {
 
     /* --- CORE RECORD PARSING --- */
     static parseCoreRecord(uint8, offset, decoder) {
-        const view = new DataView(uint8.buffer, uint8.byteOffset + offset, 442);
+        const view = new DataView(uint8.buffer, uint8.byteOffset + offset, 276);
         return {
-            id: view.getBigUint64(0, true),
-            date: view.getUint32(8, true),
-            path: decoder.decode(uint8.subarray(offset + 12, offset + 92)).replace(/\\0/g, '').trim(),
-            title: decoder.decode(uint8.subarray(offset + 92, offset + 292)).replace(/\\0/g, '').trim(),
-            imgSlug: uint8.slice(offset + 292, offset + 442)
+            id: view.getBigUint64(0, true), // 8 bytes
+            dateOffset: view.getUint32(8, true), // 4 bytes (The date offset you asked about)
+            slug: decoder.decode(uint8.subarray(offset + 12, offset + 76)).replace(/\\0/g, '').trim(), // 64 bytes
+            title: decoder.decode(uint8.subarray(offset + 76, offset + 276)).replace(/\\0/g, '').trim() // 200 bytes
         };
     }
 }
@@ -122,12 +121,12 @@ self.onmessage = async (e) => {
             combined.set(leftover); combined.set(value, leftover.length);
             let records = [];
             let offset = 0;
-            while (offset + 442 <= combined.length) {
+            while (offset + 276 <= combined.length) {
                 const id = new DataView(combined.buffer, combined.byteOffset + offset, 8).getBigUint64(0, true);
                 if (feedMap.has(id) && (!allowedIds || allowedIds.has(id))) {
                     records.push(BinaryParser.parseCoreRecord(combined, offset, decoder));
                 }
-                offset += 442;
+                offset += 276;
             }
             leftover = combined.slice(offset);
             if (records.length > 0) self.postMessage({ type: 'BATCH', batch: records, feed: feedMap });
@@ -139,4 +138,4 @@ self.onmessage = async (e) => {
         self.postMessage({ type: 'ERROR', error: err.message });
     }
 };
-`;
+\`;
