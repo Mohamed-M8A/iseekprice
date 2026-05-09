@@ -58,6 +58,7 @@
     const CONFIG = {
         BASE_URL: "https://api.iseekprice.com/",
         DOMAIN: "https://www.iseekprice.com/",
+        IMAGE_DOMAIN: "https://media.iseekprice.com/",
         PLACEHOLDER: "/public/assets/static/Save.jpg"
     };
 
@@ -67,11 +68,12 @@
 
     let currentTask = { type: null, id: null };
 
-    function toBase64URL(bytes) {
-        let lastIndex = bytes.length - 1;
-        while (lastIndex >= 0 && bytes[lastIndex] === 0) lastIndex--;
-        const cleanBytes = bytes.slice(0, lastIndex + 1);
-        return btoa(String.fromCharCode(...cleanBytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    function getDatePath(offset) {
+        const d = new Date(Date.UTC(2025, 0, 1) + (offset * 86400000));
+        const y = d.getUTCFullYear();
+        const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(d.getUTCDate()).padStart(2, '0');
+        return `${y}/${m}/${day}`;
     }
 
     async function initCart() {
@@ -119,15 +121,18 @@
                 });
             }
 
-            for (let i = 0; i < coreBuf.byteLength; i += 442) {
+            for (let i = 0; i < coreBuf.byteLength; i += 276) {
                 const id = coreView.getBigUint64(i, true);
                 if (cartIds.has(id)) {
                     const f = feedMap.get(id) || { price: 0, original: 0, shipping: 0, delivery: "قريباً" };
-                    const title = decoder.decode(new Uint8Array(coreBuf, i + 92, 200)).replace(/\0/g, '').trim();
-                    const path = decoder.decode(new Uint8Array(coreBuf, i + 12, 80)).replace(/\0/g, '').trim();
-                    const slug = toBase64URL(new Uint8Array(coreBuf, i + 292, 150));
-                    const img = `https://blogger.googleusercontent.com/img/b/R29vZ2xl/${slug}/w220-h220/p.webp`;
-                    const postUrl = `${CONFIG.DOMAIN}${path}`;
+                    
+                    const dateOffset = coreView.getUint32(i + 8, true);
+                    const slug = decoder.decode(new Uint8Array(coreBuf, i + 12, 64)).replace(/\0/g, '').trim();
+                    const title = decoder.decode(new Uint8Array(coreBuf, i + 76, 200)).replace(/\0/g, '').trim();
+                    
+                    const datePath = getDatePath(dateOffset);
+                    const img = `${CONFIG.IMAGE_DOMAIN}${datePath}/${id}_1.webp`;
+                    const postUrl = `${CONFIG.DOMAIN}product/${slug}/`;
 
                     subtotal += f.price;
                     shippingTotal += f.shipping;
