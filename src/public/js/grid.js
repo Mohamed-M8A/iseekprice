@@ -110,7 +110,7 @@ const WIDGET_CONFIG = {
     DOMAIN: "https://www.iseekprice.com/",
     BASE_URL: "https://api.iseekprice.com/",
     PLACEHOLDER: "/public/assets/static/Save.jpg",
-    INITIAL_SIZE: 12,
+    INITIAL_SIZE: 20,
     BATCH_SIZE: 50
 };
 
