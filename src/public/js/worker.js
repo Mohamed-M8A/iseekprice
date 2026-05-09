@@ -138,4 +138,4 @@ self.onmessage = async (e) => {
         self.postMessage({ type: 'ERROR', error: err.message });
     }
 };
-\`;
+`;
