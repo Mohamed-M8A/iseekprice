@@ -29,21 +29,26 @@
   </header>
 
 
-  <div id="primary">
+<div id="primary">
     <article id="single-content">
-      <div id="post-body">
+        <div id="post-body">
+            <hr class="clean-divider">
+            {{ content }}
+        </div>
         <hr class="clean-divider">
-          {{ content }}
-      </div>
-      <hr class="clean-divider">
-      <div class="share-box-wrap">
-        <button id="shareOpenBtn" class="main-share-button">مشاركة مع الاصدقاء</button>
-      </div>
-      <hr class="clean-divider">
-      <p>عروض ستعجبك</p>
-      <div id="souq-widget-root"></div>
+        <div class="share-box-wrap">
+            <button id="shareOpenBtn" class="main-share-button">
+                <svg class="icon" style="width:20px; height:20px; vertical-align:middle; margin-left:8px;">
+                    <use href='/public/assets/static/icons.svg#i-share'/>
+                </svg>
+                مشاركة مع الأصدقاء
+            </button>
+        </div>
+        <hr class="clean-divider">
+        <p>عروض ستعجبك</p>
+        <div id="souq-widget-root"></div>
     </article>
-  </div>
+</div>
 
 
 <footer id='footer' itemscope='itemscope' itemtype='https://schema.org/WPFooter'> 
