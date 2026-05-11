@@ -234,6 +234,7 @@ window.injectData = function(data) {
                 const saveAmount = savingEl.querySelector(".save-amount");
                 if (saveAmount && !saveAmount.querySelector(".fire-gif")) {
                     const fireGif = document.createElement("img");
+                    fireGif.alt = "سعر مميز";
                     fireGif.src = "/public/assets/static/fire.gif";
                     fireGif.style.cssText = "width:20px; vertical-align:middle; margin-left:5px;";
                     fireGif.classList.add("fire-gif");
