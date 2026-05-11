@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class='share-modal' id='shareModal' style="display:none;">
         <div class='modal-content'>
             <span class='modal-close-btn' id='shareCloseBtn'>&times;</span>
-            <h3 class='modal-title'>مشاركة عبر</h3>
+            <h3 class='modal-title'>مشاركة مع الاصدقاء</h3>
             <div class='share-links'>
                 <a class='share-btn s-fb' href="https://www.facebook.com/sharer/sharer.php?u=${pageUrl}" target='_blank'>
                     <svg class="icon"><use href='/public/assets/static/icons.svg#i-facebook'/></svg><span>فيسبوك</span>
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <svg class="icon"><use href='/public/assets/static/icons.svg#i-whatsapp'/></svg><span>واتساب</span>
                 </a>
                 <a class='share-btn s-tg' href="https://t.me/share/url?url=${pageUrl}&text=${pageTitle}" target='_blank'>
-                    <svg class="icon"><use href='/public/assets/static/icons.svg#i-telegram'/></svg><span>تيليجرام</span>
+                    <svg class="icon"><use href='/public/assets/static/icons.svg#i-telegram'/></svg><span>تليجرام</span>
                 </a>
                 <a class='share-btn s-pin' href="https://pinterest.com/pin/create/button/?url=${pageUrl}&description=${pageTitle}" target='_blank'>
                     <svg class="icon"><use href='/public/assets/static/icons.svg#i-pinterest'/></svg><span>بينترست</span>
@@ -172,11 +172,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 <a class='share-btn s-em' href="mailto:?subject=${pageTitle}&body=${pageUrl}">
                     <svg class="icon"><use href='/public/assets/static/icons.svg#i-email'/></svg><span>بريد إلكتروني</span>
                 </a>
+                <a class='share-btn s-copy' id='copyLinkBtn' href="javascript:void(0);">
+                    <svg class="icon"><use href='/public/assets/static/icons.svg#i-copy'/></svg><span>نسخ الرابط</span>
+                </a>
             </div>
         </div>
     </div>`;
 
-    document.body.insertAdjacentHTML('beforeend',modalHTML);const modal=document.getElementById('shareModal'),openBtn=document.getElementById('shareOpenBtn'),closeBtn=document.getElementById('shareCloseBtn'),closeModal=function(){modal.style.display='none',document.body.style.overflow='auto'};if(openBtn)openBtn.onclick=function(){modal.style.display='block',document.body.style.overflow='hidden'};if(closeBtn)closeBtn.onclick=closeModal;window.onclick=function(e){if(e.target==modal)closeModal()};document.querySelectorAll('.share-btn').forEach(function(b){if(!b.classList.contains('s-em')&&!b.classList.contains('s-wa')){b.onclick=function(e){e.preventDefault(),window.open(this.href,'share-dialog','width=600,height=400')}}});
+    document.body.insertAdjacentHTML('beforeend',modalHTML);const m=document.getElementById('shareModal'),o=document.getElementById('shareOpenBtn'),c=document.getElementById('shareCloseBtn'),cp=document.getElementById('copyLinkBtn'),cl=()=>{m.style.display='none',document.body.style.overflow='auto'};if(o)o.onclick=()=>{m.style.display='block',document.body.style.overflow='hidden'};if(c)c.onclick=cl;window.onclick=e=>{if(e.target==m)cl()};if(cp)cp.onclick=()=>{navigator.clipboard.writeText(window.location.href).then(()=>{alert('تم نسخ الرابط بنجاح!')}).catch(e=>console.error(e))};document.querySelectorAll('.share-btn').forEach(b=>{if(!b.classList.contains('s-em')&&!b.classList.contains('s-wa')&&b.id!=='copyLinkBtn'){b.onclick=function(e){e.preventDefault();window.open(this.href,'share-dialog','width=600,height=400')}}});
 });
 
 
