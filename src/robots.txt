@@ -1,6 +1,18 @@
 User-agent: *
 
-Disallow: /p/search.html
-Disallow: /search
-
 Allow: /
+Allow: /index.html
+Allow: /product/
+Allow: /pages/main/blog.html
+Allow: /pages/services/iseekchat.html
+
+Disallow: /pages/info/
+Disallow: /pages/main/cart.html
+Disallow: /pages/main/404.html
+Disallow: /pages/main/store.html
+Disallow: /package.json
+Disallow: /.eleventy.js
+Disallow: /_includes/
+Disallow: /src/
+
+Sitemap: https://www.iseekprice.com/sitemap.xml
