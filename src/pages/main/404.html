@@ -10,6 +10,22 @@ permalink: /404.html
     <link href='/css/main.css' rel='stylesheet'/>
 </head>
 <body>
+
+    <!-- HEADER -->
+<header id='header' itemscope='itemscope' itemtype='https://schema.org/WPHeader'>
+  <div class='header-main-row'>
+    <div class='header-container'>
+      <div class='logo' id='logo-wrap'></div>
+      <div class='search-container' id='search-wrap'></div>
+      <div class='header-actions' id='actions-wrap'></div>
+    </div>
+  </div>
+<nav id='widget-topbar'></nav>
+</header>
+
+<div id='widget-sidebar'></div>
+<div id='widget-overlay'></div>
+    
     <article id='page-content' style='text-align:center; padding: 50px 20px;'>
         <hr class='clean-divider'/>
         <img alt='404 Logo' src='/public/assets/static/404.png' style='max-width:300px; margin-bottom:20px;'/>
@@ -19,6 +35,59 @@ permalink: /404.html
     <hr class='clean-divider'/>
     <div style="text-align: center;"><p>عروض ستعجبك</p></div>
     <div id='souq-widget-root'></div>
+
+    <!-- FOOTER -->
+<footer id='footer' itemscope='itemscope' itemtype='https://schema.org/WPFooter'> 
+  <div class='footer-container'>
+    <div class='footer-row'>
+      
+      <div class='footer-links'>
+        <h3 class='footer-title'>عن الموقع</h3>
+        <ul>
+          <li><a href='/pages/info/about-us/'>من نحن</a></li>
+          <li><a href='/pages/info/policy/'>سياسة الموقع</a></li>
+          <li><a href='/pages/info/contact/'>اتصل بنا</a></li>
+        </ul>
+      </div>
+
+      <div class='footer-links'>
+        <h3 class='footer-title'>اعرف أكثر</h3>
+        <ul>
+          <li><a href='/pages/main/blog/'>المدونة</a></li>
+          <li><a href='/pages/services/iseekchat/'>دردشة</a></li>
+        </ul>
+      </div>
+
+      <div class='footer-social-section'>
+        <h3 class='footer-title'>تابعونا علي</h3>
+        <div class='footer-social'>
+          <a aria-label='YouTube' href='https://www.youtube.com/@ISeekPrice' rel='noopener' target='_blank'>
+            <svg class='icon'><use href='/public/assets/static/icons.svg#i-youtube'/></svg>
+          </a>
+          <a aria-label='Pinterest' href='https://www.pinterest.com/ISeekPrice' rel='noopener' target='_blank'>
+            <svg class='icon'><use href='/public/assets/static/icons.svg#i-pinterest'/></svg>
+          </a>
+          <a aria-label='Facebook' href='https://www.facebook.com/profile.php?id=61579522981793' rel='noopener' target='_blank'>
+            <svg class='icon'><use href='/public/assets/static/icons.svg#i-facebook'/></svg>
+          </a>
+          <a aria-label='Instagram' href='https://www.instagram.com/iseekprice/' rel='noopener' target='_blank'>
+            <svg class='icon'><use href='/public/assets/static/icons.svg#i-instagram'/></svg>
+          </a>
+          <a aria-label='X' href='https://x.com/ISeekPrice' rel='noopener' target='_blank'>
+            <svg class='icon'><use href='/public/assets/static/icons.svg#i-x'/></svg>
+          </a>
+          <a aria-label='Telegram' href='https://t.me/+bmBnY0FumOwxZDQ0' rel='noopener' target='_blank'>
+            <svg class='icon'><use href='/public/assets/static/icons.svg#i-telegram'/></svg>
+          </a>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  <div class='footer-bottom'>
+    <p>&#169; 2024-2026 جميع الحقوق محفوظة لموقع iseekprice.com</p>
+  </div>
+</footer>
 
     <script defer src='/js/general/worker.js'></script>  
     <script defer src='/js/general/grid.js'></script>  
