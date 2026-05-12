@@ -1,9 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
+---
+permalink: /sitemap.xml
+eleventyExcludeFromCollections: true
+---
+<?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{%- for item in collections.all %}
+  {%- if item.url contains "/product/" %}
   <url>
-    <loc>https://www.iseekprice.com/</loc>
+    <loc>https://www.iseekprice.com{{ item.url }}</loc>
+    <lastmod>{{ item.date | date: "%Y-%m-%d" }}</lastmod>
   </url>
-  <url>
-    <loc>https://www.iseekprice.com/product/a4-thermal-printer-26da</loc>
-  </url>
+  {%- endif %}
+{%- endfor %}
 </urlset>
