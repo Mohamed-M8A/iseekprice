@@ -1,7 +1,5 @@
 const workerCode = `
-/* --- CLASS DEFINITION --- */
 class BinaryParser {
-    /* --- HASHING UTILITY --- */
     static murmur(str, seed) {
         let h = seed ^ str.length;
         for (let i = 0; i < str.length; i++) {
@@ -11,7 +9,6 @@ class BinaryParser {
         return h >>> 0;
     }
 
-    /* --- FEED PARSING LOGIC --- */
     static parseFeed(buffer, targetStoreId = null) {
         const map = new Map();
         const matchedIds = new Set();
@@ -41,32 +38,26 @@ class BinaryParser {
         return { map, matchedIds };
     }
 
-    /* --- CORE RECORD PARSING --- */
     static parseCoreRecord(uint8, offset, decoder) {
         const view = new DataView(uint8.buffer, uint8.byteOffset + offset, 276);
         return {
-            id: view.getBigUint64(0, true), // 8 bytes
-            dateOffset: view.getUint32(8, true), // 4 bytes (The date offset you asked about)
-            slug: decoder.decode(uint8.subarray(offset + 12, offset + 76)).replace(/\\0/g, '').trim(), // 64 bytes
-            title: decoder.decode(uint8.subarray(offset + 76, offset + 276)).replace(/\\0/g, '').trim() // 200 bytes
+            id: view.getBigUint64(0, true),
+            dateOffset: view.getUint32(8, true),
+            slug: decoder.decode(uint8.subarray(offset + 12, offset + 76)).replace(/\\0/g, '').trim(),
+            title: decoder.decode(uint8.subarray(offset + 76, offset + 276)).replace(/\\0/g, '').trim()
         };
     }
 }
 
-/* --- WORKER EVENT LISTENER --- */
 self.onmessage = async (e) => {
     const { baseUrl, coreFile, metaFile, feedBuffer, query, storeId } = e.data;
     const decoder = new TextDecoder();
 
-    /* --- MAIN EXECUTION BLOCK --- */
     try {
-        /* --- FEED PROCESSING --- */
-        if (!feedBuffer) throw new Error("Feed buffer is required");
+        if (!feedBuffer) throw new Error("Feed buffer required");
         const { map: feedMap, matchedIds: storeMatchedIds } = BinaryParser.parseFeed(feedBuffer, storeId ? parseInt(storeId) : null);
-
         let allowedIds = storeId ? storeMatchedIds : null;
 
-        /* --- SEARCH & META FILTERING --- */
         if (query && metaFile) {
             const metaRes = await fetch(baseUrl + metaFile);
             if (metaRes.ok) {
@@ -77,9 +68,9 @@ self.onmessage = async (e) => {
                 
                 const queries = Array.isArray(query) ? query : [query];
                 const allQueriesBits = queries.map(q => {
-                    let qL = q.toLowerCase();
-                    let hA = BinaryParser.murmur(qL, 42);
-                    let hB = BinaryParser.murmur(qL, 99);
+                    let cleanQ = q.trim().toLowerCase();
+                    let hA = BinaryParser.murmur(cleanQ, 42);
+                    let hB = BinaryParser.murmur(cleanQ, 99);
                     let bits = [];
                     for (let i = 0; i < 8; i++) {
                         bits.push(Math.abs(hA + i * hB) % 2048);
@@ -88,29 +79,28 @@ self.onmessage = async (e) => {
                 });
 
                 for (let i = 0; i < metaData.length; i += 264) {
+                    let id = metaView.getBigUint64(i, true);
                     let recordMatched = false;
                     for (let bits of allQueriesBits) {
                         let match = true;
-                        for (let b of bits) { 
-                            if (!(metaData[i + 8 + Math.floor(b / 8)] & (1 << (b % 8)))) { 
-                                match = false; 
-                                break; 
-                            } 
+                        for (let b of bits) {
+                            if (!(metaData[i + 8 + Math.floor(b / 8)] & (1 << (b % 8)))) {
+                                match = false;
+                                break;
+                            }
                         }
                         if (match) {
                             recordMatched = true;
                             break;
                         }
                     }
-                    if (recordMatched) searchMatchedIds.add(metaView.getBigUint64(i, true));
+                    if (recordMatched) searchMatchedIds.add(id);
                 }
                 allowedIds = storeId ? new Set([...searchMatchedIds].filter(id => storeMatchedIds.has(id))) : searchMatchedIds;
             }
         }
 
-        /* --- CORE DATA STREAMING --- */
         const coreRes = await fetch(baseUrl + coreFile);
-        if (!coreRes.ok) throw new Error("Core not found");
         const reader = coreRes.body.getReader();
         let leftover = new Uint8Array(0);
 
@@ -131,11 +121,9 @@ self.onmessage = async (e) => {
             leftover = combined.slice(offset);
             if (records.length > 0) self.postMessage({ type: 'BATCH', batch: records, feed: feedMap });
         }
-        
-        /* --- FINAL TERMINATION --- */
         self.postMessage({ type: 'DONE' });
     } catch (err) {
         self.postMessage({ type: 'ERROR', error: err.message });
     }
 };
-`;
+`
