@@ -23,209 +23,87 @@
 <div id='widget-sidebar'></div>
 <div id='widget-overlay'></div>
     
-
-        <h2 class="main-headline" id="query-heading">جاري البحث...</h2>
-        <main id="souq-widget-root"></main>
-
+<h2 class="main-headline" id="query-heading">جاري البحث...</h2>
+<main id="souq-widget-root"></main>
 
 <footer id='footer' itemscope='itemscope' itemtype='https://schema.org/WPFooter'>
 </footer>
     
-
 <script defer src='/public/js/worker.js'></script>  
 <script defer src='/public/js/grid.js'></script>  
 <script defer src='/public/js/corepress.js'></script>    
 <script defer src='/public/js/search.js'></script>
     
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const query = urlParams.get("query")?.trim();
-        const heading = document.getElementById("query-heading");
-
-        if (query) {
-            heading.innerHTML = `نتائج البحث عن: <span style="color:var(--accent)">"${query}"</span>`;
-        } else {
-            heading.innerText = "أحدث المنتجات";
-        }
-
-    </script>
-  
 <script>
 (function() {
     const urlParams = new URLSearchParams(window.location.search);
-    const originalQuery = urlParams.get("query")?.trim() || "";
-    if (!originalQuery) return;
+    const query = urlParams.get("query")?.trim() || "";
+    const heading = document.getElementById("query-heading");
 
-    function getLinguisticEngine(input) {
-        let variants = new Map();
-
-        const add = (v, score = 1) => {
-            if (!v) return;
-            v = v.trim().replace(/\s+/g, " ");
-            if (!v || v.length < 2) return;
-            variants.set(v, Math.max(variants.get(v) || 0, score));
-        };
-
-        const normalize = (t) => {
-            return t.toLowerCase()
-                .replace(/[أإآ]/g, "ا")
-                .replace(/[ؤئ]/g, "ء")
-                .replace(/ى/g, "ي")
-                .replace(/ة/g, "ه")
-                .replace(/[\u064B-\u0652]/g, "")
-                .replace(/ـ/g, "")
-                .replace(/[^\w\u0600-\u06FF\s\-_]/g, " ")
-                .replace(/\s+/g, " ")
-                .trim();
-        };
-
-        const tokenize = (t) => {
-            return t
-                .split(/[\s\-_.,/\\]+/)
-                .filter(w => w.length > 0);
-        };
-
-        const articlesAndClitics = (w) => {
-            return w
-                .replace(/^(ال)/, "")
-                .replace(/^(و|ف|ب|ك|ل|لل)/, "")
-                .replace(/(ه|ها|هم|ك|كم|نا|ي|ين|ون|ات|ة)$/, "");
-        };
-
-        const taHandling = (t) => {
-            let s = new Set();
-            s.add(t);
-            if (t.endsWith("ه")) s.add(t.slice(0, -1) + "ة");
-            if (t.endsWith("ة")) s.add(t.slice(0, -1) + "ه");
-            return Array.from(s);
-        };
-
-        const unifyAl = (t) => {
-            let s = new Set();
-            if (t.startsWith("ال")) {
-                s.add(t.slice(2));
-                s.add(t);
-            } else {
-                s.add("ال" + t);
-                s.add(t);
-            }
-            return Array.from(s);
-        };
-
-        const phonetic = (t) => {
-            return t.replace(/sh/g, "ش")
-                .replace(/ch/g, "تش")
-                .replace(/kh/g, "خ")
-                .replace(/th/g, "ث")
-                .replace(/dh/g, "ذ")
-                .replace(/gh/g, "غ")
-                .replace(/ph/g, "ف")
-                .replace(/aa/g, "ا")
-                .replace(/ee/g, "ي")
-                .replace(/oo|ou/g, "و");
-        };
-
-        const charMap = {
-            a:'ا',b:'ب',t:'ت',s:'س',j:'ج',h:'ح',x:'خ',
-            d:'د',r:'ر',z:'ز',c:'ص',f:'ف',q:'ق',k:'ك',
-            l:'ل',m:'م',n:'ن',e:'ي',i:'ي',o:'و',u:'و',
-            v:'ف',p:'ب',y:'ي',g:'ج',w:'و'
-        };
-
-        const translit = (t) => t.split('').map(c => charMap[c] || c).join('');
-
-        const expand = (w) => w.replace(/(.)\1+/g, "$1");
-
-        const fuzzy = (w) => {
-            let r = [];
-            for (let i = 0; i < w.length; i++) {
-                r.push(w.slice(0, i) + w.slice(i + 1));
-            }
-            return r;
-        };
-
-        const ngrams = (w) => {
-            let r = [];
-            for (let n = 2; n <= 4; n++) {
-                for (let i = 0; i <= w.length - n; i++) {
-                    r.push(w.substring(i, i + n));
-                }
-            }
-            return r;
-        };
-
-        const processToken = (word, depth) => {
-            if (depth <= 0) return;
-
-            let norm = normalize(word);
-
-            let base = new Set();
-
-            base.add(norm);
-
-            taHandling(norm).forEach(v => base.add(v));
-            unifyAl(norm).forEach(v => base.add(v));
-
-            let stem = articlesAndClitics(norm);
-            taHandling(stem).forEach(v => base.add(v));
-
-            let phon = normalize(translit(phonetic(word.toLowerCase())));
-            taHandling(phon).forEach(v => base.add(v));
-
-            base.add(expand(norm));
-
-            fuzzy(norm).forEach(v => base.add(v));
-            ngrams(norm).forEach(v => base.add(v));
-
-            Array.from(base).forEach(v => {
-                add(v, depth * 3);
-
-                if (depth > 1) {
-                    processToken(v, depth - 1);
-                }
-            });
-        };
-
-        const processSentence = (text, depth) => {
-            let cleaned = normalize(text);
-            let tokens = tokenize(cleaned);
-
-            tokens.forEach(token => {
-                processToken(token, depth);
-            });
-
-            if (tokens.length > 1) {
-                let joined = tokens.join("");
-                let spaced = tokens.join(" ");
-                let reversed = tokens.slice().reverse().join(" ");
-
-                add(joined, 10);
-                add(spaced, 10);
-                add(reversed, 8);
-                add(expand(joined), 7);
-            }
-
-            add(cleaned, 12);
-        };
-
-        processSentence(input, 2);
-
-        return Array.from(variants.entries())
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 80)
-            .map(v => v[0]);
+    if (query) {
+        heading.innerHTML = `نتائج البحث عن: <span style="color:var(--accent)">"${query}"</span>`;
+    } else {
+        heading.innerText = "أحدث المنتجات";
+        return;
     }
 
-    const result = getLinguisticEngine(originalQuery);
+    function getVariants(text) {
+        let allVariants = new Set();
+        let words = text.toLowerCase().split(/\s+/).filter(w => w.length > 1);
 
-    console.group("🧠 ULTRA LINGUISTIC ENGINE FINAL");
-    console.log("Input:", originalQuery);
-    console.table(result.map((v, i) => ({ rank: i + 1, value: v })));
-    console.groupEnd();
+        const normalize = (t) => {
+            return t.replace(/[أإآ]/g, "ا")
+                    .replace(/[\u064B-\u0652]/g, "")
+                    .replace(/ـ/g, "");
+        };
 
-    window.searchVariants = result;
+        const translit = (t) => {
+            const map = {
+                'a':'ا','b':'ب','t':'ت','s':'س','j':'ج','h':'ح','x':'خ','d':'د',
+                'r':'ر','z':'ز','c':'ص','f':'ف','q':'ق','k':'ك','l':'ل','m':'م',
+                'n':'ن','e':'ي','i':'ي','o':'و','u':'و','v':'ف','p':'ب','y':'ي','g':'ج','w':'و'
+            };
+            return t.split('').map(c => map[c] || c).join('');
+        };
+
+        words.forEach(word => {
+            let currentSet = new Set();
+            let n = normalize(word);
+            currentSet.add(n);
+
+            if (/[a-z]/i.test(n)) {
+                currentSet.add(normalize(translit(n)));
+            }
+
+            let tempArr = Array.from(currentSet);
+            tempArr.forEach(v => {
+                if (v.startsWith("ال")) currentSet.add(v.substring(2));
+                else currentSet.add("ال" + v);
+            });
+
+            tempArr = Array.from(currentSet);
+            tempArr.forEach(v => {
+                if (v.endsWith("ة")) currentSet.add(v.slice(0, -1) + "ه");
+                if (v.endsWith("ه")) currentSet.add(v.slice(0, -1) + "ة");
+            });
+
+            tempArr = Array.from(currentSet);
+            tempArr.forEach(v => {
+                currentSet.add(v.replace(/(ات|ون|ين)$/, ""));
+            });
+
+            currentSet.forEach(v => {
+                if (v.length > 2) allVariants.add(v);
+            });
+        });
+
+        return Array.from(allVariants);
+    }
+
+    window.searchVariants = getVariants(query);
+    console.log("Final Query Tokens:", window.searchVariants);
 })();
 </script>
-  
+
 </body>
 </html>
