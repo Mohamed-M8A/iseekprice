@@ -135,10 +135,9 @@
 // =================== Footer ===================
 
 
-document.addEventListener("DOMContentLoaded", () => {
-    const footerInjector = document.getElementById('footer');
-    if (!footerInjector) return;
+const footerInjector = document.getElementById('footer');
 
+if (footerInjector) {
     const sections = [
         {
             title: "عن الموقع",
@@ -199,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <p>&#169; 2024-${new Date().getFullYear()} جميع الحقوق محفوظة لموقع iseekprice.com</p>
         </div>
     `;
-});
+}
 
 
 // =================== Cart + Back To Top + Share ===================
