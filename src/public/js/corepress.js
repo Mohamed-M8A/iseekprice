@@ -132,6 +132,76 @@
 })();
 
 
+// =================== Footer ===================
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    const footerInjector = document.getElementById('footer');
+    if (!footerInjector) return;
+
+    const sections = [
+        {
+            title: "عن الموقع",
+            links: [
+                { text: "من نحن", url: "/pages/info/about-us/" },
+                { text: "سياسة الموقع", url: "/pages/info/policy/" },
+                { text: "اتصل بنا", url: "/pages/info/contact/" }
+            ]
+        },
+        {
+            title: "اعرف أكثر",
+            links: [
+                { text: "المدونة", url: "/pages/main/blog/" },
+                { text: "دردشة", url: "/pages/services/iseekchat/" }
+            ]
+        }
+    ];
+
+    const socialLinks = [
+        { label: "YouTube", icon: "i-youtube", url: "https://www.youtube.com/@ISeekPrice" },
+        { label: "Pinterest", icon: "i-pinterest", url: "https://www.pinterest.com/ISeekPrice" },
+        { label: "Facebook", icon: "i-facebook", url: "https://www.facebook.com/profile.php?id=61579522981793" },
+        { label: "Instagram", icon: "i-instagram", url: "https://www.instagram.com/iseekprice/" },
+        { label: "X", icon: "i-x", url: "https://x.com/ISeekPrice" },
+        { label: "Telegram", icon: "i-telegram", url: "https://t.me/+bmBnY0FumOwxZDQ0" }
+    ];
+
+    const sectionsHtml = sections.map(sec => `
+        <div class='footer-links'>
+            <h3 class='footer-title'>${sec.title}</h3>
+            <ul>
+                ${sec.links.map(link => `<li><a href='${link.url}'>${link.text}</a></li>`).join('')}
+            </ul>
+        </div>
+    `).join('');
+
+    const socialHtml = `
+        <div class='footer-social-section'>
+            <h3 class='footer-title'>تابعونا علي</h3>
+            <div class='footer-social'>
+                ${socialLinks.map(soc => `
+                    <a aria-label='${soc.label}' href='${soc.url}' rel='noopener' target='_blank'>
+                        <svg class='icon'><use href='/public/assets/static/icons.svg#${soc.icon}'/></svg>
+                    </a>
+                `).join('')}
+            </div>
+        </div>
+    `;
+
+    footerInjector.innerHTML = `
+        <div class='footer-container'>
+            <div class='footer-row'>
+                ${sectionsHtml}
+                ${socialHtml}
+            </div>
+        </div>
+        <div class='footer-bottom'>
+            <p>&#169; 2024-${new Date().getFullYear()} جميع الحقوق محفوظة لموقع iseekprice.com</p>
+        </div>
+    `;
+});
+
+
 // =================== Cart + Back To Top + Share ===================
 
 function showCartToast(m,t="success"){const h=document.createElement("div");document.body.prepend(h);const s=h.attachShadow({mode:"open"}),d=document.createElement("div");d.textContent=m;s.appendChild(d);const st=document.createElement("style");st.textContent=`div{position:fixed;top:20px;right:20px;min-width:220px;max-width:320px;background:${t==="error"?"#e74c3c":"#2ecc71"};color:white;font-family:sans-serif;font-size:14px;padding:12px 18px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.2);opacity:0;transform:translateX(120%);transition:all 0.4s ease;z-index:1000000;}div.show{opacity:1;transform:translateX(0);}`;s.appendChild(st);setTimeout(()=>d.classList.add("show"),50);setTimeout(()=>{d.classList.remove("show");setTimeout(()=>h.remove(),400)},3000)}
