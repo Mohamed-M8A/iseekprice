@@ -19,7 +19,7 @@ body{background-color:#f4f7f6;margin:0;font-family:system-ui,-apple-system,sans-
 <div class="contact-box">
     <div class="contact-form">
         <h2>راسلنا مباشرة</h2>
-        <form class="contact-form-blogger" method="POST" action="https://formspree.io/f/xlgpplkb">
+        <form class="contact-form" method="POST" action="https://formspree.io/f/xlgpplkb">
             <label for="field-name">الاسم بالكامل</label>
             <input id="field-name" name="name" type="text" placeholder="مثال: محمد أحمد" required>
 
@@ -49,7 +49,7 @@ body{background-color:#f4f7f6;margin:0;font-family:system-ui,-apple-system,sans-
 </div>
 
 <script>
-    document.querySelector('.contact-form-blogger').addEventListener('submit', function(event) {
+    document.querySelector('.contact-form').addEventListener('submit', function(event) {
         event.preventDefault();
         var form = event.target;
         var formData = new FormData(form);
