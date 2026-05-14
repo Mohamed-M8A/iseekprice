@@ -48,88 +48,21 @@
             <div id='widget-side-list'></div>`;
     }
 
-
     
-    const htmlEl = document.documentElement;
-    const darkBtn = document.getElementById("dark-toggler");
-    function applyTheme(theme, persist) {
-    const iconUse = darkBtn ? darkBtn.querySelector("use") : null;
-    const iconPath = "/public/assets/static/icons.svg";
-        if (theme === "dark") {
-            htmlEl.classList.add("dark-mode");
-            htmlEl.setAttribute("data-theme", "dark");
-            if (iconUse) iconUse.setAttribute("href", iconPath + "#i-sun");
-        } else {
-            htmlEl.classList.remove("dark-mode");
-            htmlEl.setAttribute("data-theme", "light");
-            if (iconUse) iconUse.setAttribute("href", iconPath + "#i-moon");
-        }
-        if (persist) localStorage.setItem("theme", theme);
-    }
-    let savedTheme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    applyTheme(savedTheme, false);
-    if (darkBtn) {
-        darkBtn.addEventListener("click", e => {
-            e.preventDefault();
-            applyTheme(htmlEl.classList.contains("dark-mode") ? "light" : "dark", true);
-        });
-    }
+    
+const htmlEl=document.documentElement;const darkBtn=document.getElementById("dark-toggler");function applyTheme(theme,persist){const iconUse=darkBtn?darkBtn.querySelector("use"):null;const iconPath="/public/assets/static/icons.svg";if(theme==="dark"){htmlEl.classList.add("dark-mode");htmlEl.setAttribute("data-theme","dark");if(iconUse)iconUse.setAttribute("href",iconPath+"#i-sun");}else{htmlEl.classList.remove("dark-mode");htmlEl.setAttribute("data-theme","light");if(iconUse)iconUse.setAttribute("href",iconPath+"#i-moon");}
+if(persist)localStorage.setItem("theme",theme);}
+let savedTheme=localStorage.getItem("theme")||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");applyTheme(savedTheme,!1);if(darkBtn){darkBtn.addEventListener("click",e=>{e.preventDefault();applyTheme(htmlEl.classList.contains("dark-mode")?"light":"dark",!0)})}
 
 
     
-   function updateCartWidget() {
-   const cart = JSON.parse(localStorage.getItem("cart")) || [];
-   const countEl = document.getElementById("cart-count");
-   if (countEl) { countEl.textContent = cart.length; cart.length > 0 ? countEl.classList.add("active") : countEl.classList.remove("active"); }
-    }
-    updateCartWidget();
-    window.addEventListener("cartUpdated", updateCartWidget);
-    const cartBtn = document.getElementById("cart-widget-header");
-    if (cartBtn) cartBtn.onclick = () => window.location.href = "/pages/main/cart/";
-
-
-    const dropdown = document.getElementById("countryDropdown");
-    const selected = dropdown ? dropdown.querySelector(".selected") : null;
-    const options = dropdown ? dropdown.querySelector(".options") : null;
-    const url = new URL(window.location.href);
-    const paramCountry = url.searchParams.get("country");
-    const savedCountry = localStorage.getItem("Cntry");
-
-    function setActiveCountry(code, updateUrl = true) {
-        if (!options) return;
-        const li = options.querySelector(`li[data-value="${code}"]`);
-        if (!li) return;
-        localStorage.setItem("Cntry", code);
-        if (selected) selected.innerHTML = li.innerHTML;
-        if (updateUrl) { url.searchParams.set("country", code); window.history.replaceState({}, "", url); }
-    }
-
-    if (paramCountry) setActiveCountry(paramCountry); 
-    else if (savedCountry) setActiveCountry(savedCountry); 
-    else setActiveCountry("SA");
-
-    if (selected && options) {
-        selected.onclick = (e) => { e.stopPropagation(); dropdown.classList.toggle("open"); options.style.display = dropdown.classList.contains("open") ? "block" : "none"; };
-        options.onclick = (e) => {
-            const li = e.target.closest("li");
-            if (!li) return;
-            setActiveCountry(li.getAttribute("data-value"));
-            window.location.reload();
-        };
-    }
-
+function updateCartWidget(){const cart=JSON.parse(localStorage.getItem("cart"))||[];const countEl=document.getElementById("cart-count");if(countEl){countEl.textContent=cart.length;cart.length>0?countEl.classList.add("active"):countEl.classList.remove("active")}}
+updateCartWidget();window.addEventListener("cartUpdated",updateCartWidget);const cartBtn=document.getElementById("cart-widget-header");if(cartBtn)cartBtn.onclick=()=>window.location.href="/pages/main/cart/";const dropdown=document.getElementById("countryDropdown");const selected=dropdown?dropdown.querySelector(".selected"):null;const options=dropdown?dropdown.querySelector(".options"):null;const url=new URL(window.location.href);const paramCountry=url.searchParams.get("country");const savedCountry=localStorage.getItem("Cntry");function setActiveCountry(code,updateUrl=!0){if(!options)return;const li=options.querySelector(`li[data-value="${code}"]`);if(!li)return;localStorage.setItem("Cntry",code);if(selected)selected.innerHTML=li.innerHTML;if(updateUrl){url.searchParams.set("country",code);window.history.replaceState({},"",url)}}
+if(paramCountry)setActiveCountry(paramCountry);else if(savedCountry)setActiveCountry(savedCountry);else setActiveCountry("SA");if(selected&&options){selected.onclick=(e)=>{e.stopPropagation();dropdown.classList.toggle("open");options.style.display=dropdown.classList.contains("open")?"block":"none"};options.onclick=(e)=>{const li=e.target.closest("li");if(!li)return;setActiveCountry(li.getAttribute("data-value"));window.location.reload()}}
 
     
-    const canonical = document.createElement("link");
-    canonical.rel = "canonical";
-    canonical.href = window.location.origin + window.location.pathname;
-    document.head.appendChild(canonical);
-    if (paramCountry) {
-        const robots = document.createElement("meta");
-        robots.name = "robots"; robots.content = "noindex";
-        document.head.appendChild(robots);
-    }
-})();
+    
+const canonical=document.createElement("link");canonical.rel="canonical";canonical.href=window.location.origin+window.location.pathname;document.head.appendChild(canonical);if(paramCountry){const robots=document.createElement("meta");robots.name="robots";robots.content="noindex";document.head.appendChild(robots)}})()
 
 
 // =================== Footer ===================
@@ -253,10 +186,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // =================== Track ===================
+;const UIDManager={generate(){const n=new Date();return`ID-${n.getFullYear()}${(n.getMonth()+1).toString().padStart(2,'0')}${n.getDate().toString().padStart(2,'0')}${n.getHours().toString().padStart(2,'0')}${n.getMinutes().toString().padStart(2,'0')}-${Math.random().toString(36).substring(2,9).toUpperCase()}`},getPersistentId(){let i=localStorage.getItem("user_fingerprint");return i||(i=this.generate(),localStorage.setItem("user_fingerprint",i)),i}};
 
-const UIDManager={generate(){const now=new Date();const datePart=now.getFullYear().toString()+(now.getMonth()+1).toString().padStart(2,'0')+now.getDate().toString().padStart(2,'0')+now.getHours().toString().padStart(2,'0')+now.getMinutes().toString().padStart(2,'0')+now.getSeconds().toString().padStart(2,'0');const randomPart=Math.random().toString(36).substring(2,10).toUpperCase();return `ID-${datePart}-${randomPart}`},getPersistentId(){let id=localStorage.getItem("user_fingerprint");if(!id){id=this.generate();localStorage.setItem("user_fingerprint",id)}
-return id}}
-    
 
-(function(){const w="https://script.google.com/macros/s/AKfycbyGmFcwqcsvO7ZQ8Tl7LhaicR_c_ox-QsiEi3m-C6GHM2bw1kFMrxRrcncGe-Tfxnd9iQ/exec";let a=["Entry"],e="Direct/Closed",s=!1;const gV=()=>document.querySelector('.UID')?.innerText.trim()||localStorage.getItem('user_fingerprint')||"Unknown";const gC=()=>localStorage.getItem("Cntry")||"SA";const gO=()=>{const n=navigator.userAgent;return/Android/i.test(n)?"Android":/iPhone|iPad|iPod/i.test(n)?"iOS":/Win/i.test(n)?"Windows":/Mac/i.test(n)?"MacOS":"Other"};const gB=()=>{const n=navigator.userAgent.toLowerCase();return n.includes("edg")?"Edge":n.includes("opr")?"Opera":n.includes("chrome")?"Chrome":n.includes("firefox")?"Firefox":"Safari"};const send=()=>{if(s||!a.length)return;const d=JSON.stringify({entryTime:new Date().toLocaleString('sv-SE'),visitorId:gV(),action:a.join(" -> "),pageUrl:location.pathname,referrer:document.referrer||"Direct",exitDestination:e,os:gO(),browser:gB(),screenRes:`${screen.width}x${screen.height} [${gC()}]`});navigator.sendBeacon?navigator.sendBeacon(w,d):fetch(w,{method:'POST',body:d,keepalive:!0});s=!0};document.addEventListener("mousedown",(t)=>{const c=t.target.closest("a, button, .iseek-btn, .copy-button, .tab-buttons button");if(!c)return;let l="";if(c.tagName==="A"||c.classList.contains("buy-button")){if(c.href&&!c.href.includes(location.hostname)&&!c.href.startsWith("js")){e=c.href;l="Exit"}}
-if(c.classList.contains("add-to-cart"))l="Cart";if(c.classList.contains("copy-button"))l="Coupon";if(c.classList.contains("iseek-btn"))l="Alert";if(c.id==="btn-download-chart")l="Download";if(c.id==="btn-share-chart")l="Share";if(c.closest(".tab-buttons"))l="Tab:"+c.innerText.trim();if(l&&!a.includes(l))a.push(l);});window.addEventListener("pagehide",send);window.addEventListener("visibilitychange",()=>document.visibilityState==="hidden"&&send())})()
+(function(){const w="https://script.google.com/macros/s/AKfycbyGmFcwqcsvO7ZQ8Tl7LhaicR_c_ox-QsiEi3m-C6GHM2bw1kFMrxRrcncGe-Tfxnd9iQ/exec",a=["Entry"];let e="Direct/Closed",s=!1;const gV=()=>document.querySelector('.UID')?.innerText.trim()||UIDManager.getPersistentId(),gC=()=>localStorage.getItem("Cntry")||"SA",gO=()=>{const n=navigator.userAgent;return/Android/i.test(n)?"Android":/iPhone|iPad|iPod/i.test(n)?"iOS":/Win/i.test(n)?"Windows":/Mac/i.test(n)?"MacOS":"Other"},gB=()=>{const n=navigator.userAgent.toLowerCase();return n.includes("edg")?"Edge":n.includes("opr")?"Opera":n.includes("chrome")?"Chrome":n.includes("firefox")?"Firefox":"Safari"},send=()=>{if(s||!a.length)return;const d=JSON.stringify({entryTime:new Date().toLocaleString('sv-SE'),visitorId:gV(),action:a.join(" -> "),pageUrl:location.pathname,referrer:document.referrer||"Direct",exitDestination:e,os:gO(),browser:gB(),screenRes:`${screen.width}x${screen.height} [${gC()}]`});navigator.sendBeacon?navigator.sendBeacon(w,d):fetch(w,{method:'POST',body:d,keepalive:!0}),s=!0};document.addEventListener("mousedown",t=>{const c=t.target.closest("a, button, .iseek-btn, .copy-button, .tab-buttons button");if(c){let l="";if(("A"===c.tagName||c.classList.contains("buy-button"))&&c.href&&!c.href.includes(location.hostname)&&!c.href.startsWith("js"))e=c.href,l="Exit";c.classList.contains("add-to-cart")&&(l="Cart"),c.classList.contains("copy-button")&&(l="Coupon"),c.classList.contains("iseek-btn")&&(l="Alert"),"btn-download-chart"===c.id&&(l="Download"),"btn-share-chart"===c.id&&(l="Share"),c.closest(".tab-buttons")&&(l="Tab:"+c.innerText.trim()),l&&!a.includes(l)&&a.push(l)}}),window.addEventListener("pagehide",send),window.addEventListener("visibilitychange",()=>"hidden"===document.visibilityState&&send())})();
