@@ -37,7 +37,8 @@ class Renderer {
         return `${d.getUTCFullYear()}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${String(d.getUTCDate()).padStart(2, '0')}`;
     }
 
-    createCard(product, domain, feed) {
+    createCard(product, domain) {
+        const feed = product?.feed;
         if (!product || !feed) return null;
         
         const card = document.createElement("a");
@@ -64,16 +65,21 @@ class Renderer {
             badgeHTML = `<div class="discount-badge">-${discount}%</div>`;
         }
         
+        const safeTitle = product.title.replace(/[&<>'"]/g, tag => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        }[tag] || tag));
+
         card.innerHTML = `
+            <span class="UID" style="display:none">${product.id}</span>
             <div class="image-container">
                 ${badgeHTML}
-                <img class="post-image" alt="${product.title}" src="${this.placeholder}" data-src="${imageUrl}">
+                <img class="post-image" alt="${safeTitle}" src="${this.placeholder}" data-src="${imageUrl}">
                 <div class="external-cart-button">
                     <svg class='icon'><use href='/public/assets/static/icons.svg#i-cart'/></svg>
                 </div>
             </div>
             <div class="post-content">
-                <h3 class="post-title">${product.title}</h3>
+                <h3 class="post-title">${safeTitle}</h3>
                 <div class="price-display">
                     <span class="discounted-price">${price} ${symbol}</span>
                     ${feed.original > feed.price ? `<span class="original-price">${original} ${symbol}</span>` : ''}
@@ -90,10 +96,10 @@ class Renderer {
         return card;
     }
 
-    renderBatch(products, domain, feedMap) {
+    renderBatch(products, domain) {
         const fragment = document.createDocumentFragment();
         products.forEach(p => {
-            const card = this.createCard(p, domain, feedMap.get(p.id));
+            const card = this.createCard(p, domain);
             if (card) fragment.appendChild(card);
         });
         this.container.appendChild(fragment);
@@ -126,11 +132,11 @@ async function startWidget() {
         }
 
         const mapRes = await fetch(`${WIDGET_CONFIG.BASE_URL}General/map.json?v=${Date.now()}`);
-        const fileMap = await mapRes.json();
+        window.fileMap = await mapRes.json();
         const country = localStorage.getItem("Cntry") || "SA";
         
-        const feedRes = await fetch(`${WIDGET_CONFIG.BASE_URL}${country}/feed_${fileMap.regions[country].feed}.bin`);
-        const feedBuffer = await feedRes.arrayBuffer();
+        const feedRes = await fetch(`${WIDGET_CONFIG.BASE_URL}${country}/feed_${window.fileMap.regions[country].feed}.bin`);
+        window.sharedFeedBuffer = await feedRes.arrayBuffer();
 
         root.innerHTML = `
             <div id="product-posts" class="product-grid"></div>
@@ -142,7 +148,7 @@ async function startWidget() {
         const loader = document.getElementById('loader');
         const renderer = new Renderer('product-posts', WIDGET_CONFIG.PLACEHOLDER);
         
-        let storeData = { core: [], feed: new Map() };
+        let storeData = { core: [] };
         let currentIndex = 0;
         let isFullyLoaded = false;
 
@@ -155,7 +161,7 @@ async function startWidget() {
             const batch = storeData.core.slice(currentIndex, limit);
             
             if (batch.length > 0) {
-                renderer.renderBatch(batch, WIDGET_CONFIG.DOMAIN, storeData.feed);
+                renderer.renderBatch(batch, WIDGET_CONFIG.DOMAIN);
                 currentIndex = limit;
             }
             
@@ -165,7 +171,6 @@ async function startWidget() {
         worker.onmessage = (e) => {
             if (e.data.type === 'BATCH') {
                 loader.style.display = 'none';
-                storeData.feed = e.data.feed;
                 storeData.core.push(...e.data.batch);
 
                 if (currentIndex === 0 && storeData.core.length >= WIDGET_CONFIG.INITIAL_SIZE) {
@@ -190,15 +195,14 @@ async function startWidget() {
             loader.style.display = 'flex';
             loadMoreBtn.style.display = 'none';
             storeData.core = [];
-            storeData.feed = new Map();
             currentIndex = 0;
             isFullyLoaded = false;
 
             worker.postMessage({
                 baseUrl: WIDGET_CONFIG.BASE_URL,
-                coreFile: `General/core_${fileMap.core}.bin`,
-                metaFile: `General/meta_${fileMap.meta}.bin`,
-                feedBuffer: feedBuffer,
+                coreFile: `General/core_${window.fileMap.core}.bin`,
+                metaFile: `General/meta_${window.fileMap.meta}.bin`,
+                feedBuffer: window.sharedFeedBuffer,
                 query: window.searchVariants || (rawQuery ? [[rawQuery]] : null),
                 storeId: urlParams.get('store'),
                 filters: window.currentFilters || null
@@ -208,7 +212,7 @@ async function startWidget() {
         window.triggerWorkerSearch();
 
     } catch (err) {
-        console.error("Widget Error:", err);
+        console.error(err);
     }
 }
 
