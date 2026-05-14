@@ -81,13 +81,16 @@
         return h >>> 0;
     }
 
-    function getVariants(text) {
+    function getVariantsGroups(text) {
         if (!text) return [];
-        let allVariants = new Set();
-        let words = text.toLowerCase().split(/\s+/).filter(w => w.length > 1);
+        let groupedVariants = [];
+        let words = text.toLowerCase().split(/[\s\-]+/).filter(w => w.length > 0);
 
         const normalize = (t) => {
             return t.replace(/[أإآ]/g, "ا")
+                    .replace(/ؤ/g, "و")
+                    .replace(/[ئى]/g, "ي")
+                    .replace(/ء/g, "")
                     .replace(/[\u064B-\u0652]/g, "")
                     .replace(/ـ/g, "");
         };
@@ -114,38 +117,52 @@
             tempArr.forEach(v => {
                 if (v.startsWith("ال")) currentSet.add(v.substring(2));
                 else currentSet.add("ال" + v);
+
+                if (v.match(/^(وال|فال|بال|كال|لل)/)) currentSet.add(v.substring(3));
+                else if (v.match(/^(ب|ف|ك|و)(ال)/)) currentSet.add(v.substring(1));
             });
 
             tempArr = Array.from(currentSet);
             tempArr.forEach(v => {
                 if (v.endsWith("ة")) currentSet.add(v.slice(0, -1) + "ه");
                 if (v.endsWith("ه")) currentSet.add(v.slice(0, -1) + "ة");
+
+                const suffixes = /(ات|ون|ين|ان|ها|هم|كم|نا|ي)$/;
+                if (v.match(suffixes)) {
+                    let stripped = v.replace(suffixes, "");
+                    if (stripped.length > 1) currentSet.add(stripped);
+                }
             });
 
-            tempArr = Array.from(currentSet);
-            tempArr.forEach(v => {
-                currentSet.add(v.replace(/(ات|ون|ين)$/, ""));
-            });
+            let finalGroup = Array.from(currentSet).filter(v => v.length > 1 || /^[a-z0-9]+$/i.test(v));
+            if (finalGroup.length > 0) {
+                groupedVariants.push(finalGroup);
+            }
+        });
 
-            currentSet.forEach(v => {
-                if (v.length > 1) allVariants.add(v);
+        return groupedVariants;
+    }
+
+    window.searchVariants = getVariantsGroups(query);
+    
+    if (window.searchVariants.length > 0) {
+        let flatVariants = window.searchVariants.flat();
+        let tableData = [];
+        
+        window.searchVariants.forEach((group, index) => {
+            group.forEach(v => {
+                tableData.push({ "المجموعة (الكلمة الأساسية)": index + 1, "الاحتمال اللغوي (Variant)": v });
             });
         });
 
-        return Array.from(allVariants);
-    }
-
-    window.searchVariants = getVariants(query);
-    
-    if (window.searchVariants.length > 0) {
         console.groupCollapsed("%c🔎 الكلمات الدلالية المرسلة لمحرك البحث (اضغط للفتح)", "color: #ff6000; font-size: 14px; font-weight: bold;");
-        console.table(window.searchVariants.map((v, i) => ({ "الترتيب": i + 1, "الكلمة (Variant)": v })));
+        console.table(tableData);
         console.groupEnd();
 
         let bloomArray = new Array(2048).fill('·');
         let activeBitsSet = new Set();
 
-        window.searchVariants.forEach(q => {
+        flatVariants.forEach(q => {
             let hA = murmur(q, 42);
             let hB = murmur(q, 99);
             for (let i = 0; i < 8; i++) {
