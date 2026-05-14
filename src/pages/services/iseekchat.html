@@ -195,7 +195,6 @@ document.getElementById('user-input').addEventListener('input', (e) => {
     const dot = document.getElementById('status-dot');
     const text = document.getElementById('status-text');
     
-    // ألوان هادئة وراقية تناسب الدارك مود
     if (val.includes('سعر') || val.includes('بكم') || val.includes('تكلفة')) {
         dot.style.background = '#10b981'; dot.style.boxShadow = '0 0 8px rgba(16,185,129,0.5)'; text.innerText = 'تحليل الأسعار...';
     } else if (val.includes('توصيل') || val.includes('شحن') || val.includes('مكان')) {
@@ -204,7 +203,6 @@ document.getElementById('user-input').addEventListener('input', (e) => {
         dot.style.background = ''; dot.style.boxShadow = ''; text.innerText = 'ISEEKPRICE AI';
     }
     
-    // ضبط ارتفاع حقل الإدخال تلقائياً
     e.target.style.height = 'auto';
     e.target.style.height = (e.target.scrollHeight < 120 ? e.target.scrollHeight : 120) + 'px';
 });
@@ -272,71 +270,65 @@ document.getElementById('user-input').addEventListener('keydown', (e) => {
 });
 
 /* =========================================
-   [6] INTERACTIVE NEURAL NETWORK CANVAS
+   [6] CLOUDFLARE-STYLE GRID CANVAS
    ========================================= */
 const canvas = document.getElementById('bg-canvas');
 const ctx = canvas.getContext('2d');
-let particles = [];
-let mouse = { x: null, y: null };
-const connectionRange = 250; // نطاق واسع جداً للاستجابة للماوس
-
-class Particle {
-    constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.vx = (Math.random() - 0.5) * 0.3; // حركة بطيئة وناعمة
-        this.vy = (Math.random() - 0.5) * 0.3;
-        this.baseSize = Math.random() * 1.5 + 0.5;
-    }
-    update() {
-        this.x += this.vx; this.y += this.vy;
-        if(this.x < 0 || this.x > canvas.width) this.vx *= -1;
-        if(this.y < 0 || this.y > canvas.height) this.vy *= -1;
-    }
-}
+let gridDots = [];
+const spacing = 32; // المسافة بين النقاط المنتظمة
+const hoverRadius = 220; // النطاق الواسع لتأثير الماوس
+let mouse = { x: -1000, y: -1000 };
 
 function initCanvas() {
-    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-    particles = [];
-    let particleCount = (canvas.width * canvas.height) / 15000; 
-    for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+    canvas.width = window.innerWidth; 
+    canvas.height = window.innerHeight;
+    gridDots = [];
+    
+    // إنشاء شبكة النقاط المنتظمة لتغطية الشاشة كاملة
+    for (let x = 0; x <= canvas.width + spacing; x += spacing) {
+        for (let y = 0; y <= canvas.height + spacing; y += spacing) {
+            gridDots.push({ x, y, baseSize: 1.2 }); // حجم النقطة صغير جداً
+        }
+    }
 }
 
-window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
-window.addEventListener('mouseout', () => { mouse.x = null; mouse.y = null; });
+window.addEventListener('mousemove', (e) => { 
+    mouse.x = e.clientX; 
+    mouse.y = e.clientY; 
+});
+// إخفاء التأثير عند خروج الماوس من الشاشة
+window.addEventListener('mouseout', () => { 
+    mouse.x = -1000; 
+    mouse.y = -1000; 
+});
 
 function animateCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    particles.forEach(p => {
-        p.update();
-        let distToMouse = 1000;
-        if (mouse.x !== null) distToMouse = Math.hypot(mouse.x - p.x, mouse.y - p.y);
+    gridDots.forEach(dot => {
+        let dist = Math.hypot(mouse.x - dot.x, mouse.y - dot.y);
         
-        // رسم النقطة (عقدة)
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.baseSize, 0, Math.PI * 2);
-        // لون النقطة خافت جداً، يضيء باللون الأبيض/الفضي عند اقتراب الماوس
-        ctx.fillStyle = distToMouse < connectionRange ? `rgba(255, 255, 255, ${1 - distToMouse/connectionRange})` : 'rgba(255, 255, 255, 0.03)';
-        ctx.fill();
-
-        // رسم الخطوط (الشبكة العصبية)
-        if (distToMouse < connectionRange) {
-            particles.forEach(p2 => {
-                let distToP2 = Math.hypot(p.x - p2.x, p.y - p2.y);
-                if(distToP2 < 100) { // مسافة ربط النقاط ببعضها
-                    ctx.beginPath();
-                    ctx.moveTo(p.x, p.y);
-                    ctx.lineTo(p2.x, p2.y);
-                    // لون الخط فضي ناعم يختفي بسلاسة
-                    let opacity = (1 - distToMouse/connectionRange) * (1 - distToP2/100) * 0.5;
-                    ctx.strokeStyle = `rgba(220, 225, 230, ${opacity})`;
-                    ctx.lineWidth = 0.5;
-                    ctx.stroke();
-                }
-            });
+        if (dist < hoverRadius) {
+            // حساب قوة التأثير بناءً على القرب من الماوس (1 = الأقرب، 0 = الأبعد)
+            let intensity = 1 - (dist / hoverRadius);
+            
+            // زيادة الحجم بشكل طفيف جداً مع توهج اللون البرتقالي
+            ctx.arc(dot.x, dot.y, dot.baseSize + (intensity * 1.5), 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(224, 122, 31, ${intensity})`; // اللون البرتقالي المعتمد
+            
+            // إضافة توهج (Glow) حول النقطة المضيئة
+            ctx.shadowBlur = intensity * 15;
+            ctx.shadowColor = `rgba(224, 122, 31, ${intensity})`;
+        } else {
+            // الحالة الطبيعية للنقطة (رمادي خافت جداً، غير مزعج)
+            ctx.arc(dot.x, dot.y, dot.baseSize, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+            ctx.shadowBlur = 0;
         }
+        ctx.fill();
     });
+    
     requestAnimationFrame(animateCanvas);
 }
 
