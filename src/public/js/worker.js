@@ -65,7 +65,6 @@ self.onmessage = async (e) => {
                 const metaBuf = await metaRes.arrayBuffer();
                 const metaData = new Uint8Array(metaBuf);
                 const metaView = new DataView(metaBuf);
-                
                 const queryGroups = Array.isArray(query[0]) ? query : [query];
                 const groupedBits = queryGroups.map(group => {
                     return group.map(q => {
@@ -115,11 +114,9 @@ self.onmessage = async (e) => {
             let combined = new Uint8Array(leftover.length + value.length);
             combined.set(leftover); combined.set(value, leftover.length);
             let offset = 0;
-            
             while (offset + 276 <= combined.length) {
                 const id = new DataView(combined.buffer, combined.byteOffset + offset, 8).getBigUint64(0, true);
                 let isAllowed = (!hasActiveQuery && !storeId) ? true : searchScores.has(id);
-                
                 if (isAllowed && feedMap.has(id)) {
                     let feedData = feedMap.get(id);
                     let passesFilters = true;
@@ -142,19 +139,18 @@ self.onmessage = async (e) => {
         }
 
         allMatchedRecords.sort((a, b) => {
-            let sortType = filters && filters.sortBy ? filters.sortBy : 'relevance';
-            let feedA = feedMap.get(a.id);
-            let feedB = feedMap.get(b.id);
-            
-            if (sortType === 'price_asc') return feedA.price - feedB.price;
-            if (sortType === 'price_desc') return feedB.price - feedA.price;
-            if (sortType === 'orders_desc') return feedB.orders - feedA.orders;
-            if (sortType === 'rating_desc') return feedB.score - feedA.score;
-            
-            if (hasActiveQuery) {
-                if (b.relevance !== a.relevance) return b.relevance - a.relevance;
+            if (filters && filters.sortBy && filters.sortBy !== 'relevance') {
+                let feedA = feedMap.get(a.id);
+                let feedB = feedMap.get(b.id);
+                if (filters.sortBy === 'price_asc') return feedA.price - feedB.price;
+                if (filters.sortBy === 'price_desc') return feedB.price - feedA.price;
+                if (filters.sortBy === 'orders_desc') return feedB.orders - feedA.orders;
+                if (filters.sortBy === 'rating_desc') return feedB.score - feedA.score;
             }
-            return (feedB ? feedB.orders : 0) - (feedA ? feedA.orders : 0);
+            if (hasActiveQuery && b.relevance !== a.relevance) {
+                return b.relevance - a.relevance;
+            }
+            return 0;
         });
 
         const batchSize = 50;
