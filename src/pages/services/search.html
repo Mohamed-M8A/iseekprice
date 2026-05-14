@@ -84,7 +84,7 @@
     function getVariantsGroups(text) {
         if (!text) return [];
         let groupedVariants = [];
-        let words = text.toLowerCase().split(/[\s\-]+/).filter(w => w.length > 0);
+        let words = text.split(/[\s\-]+/).filter(w => w.length > 0);
 
         const normalize = (t) => {
             return t.replace(/[أإآ]/g, "ا")
@@ -109,8 +109,10 @@
             let n = normalize(word);
             currentSet.add(n);
 
-            if (/[a-z]/i.test(n)) {
-                currentSet.add(normalize(translit(n)));
+            if (/[a-zA-Z]/.test(word)) {
+                currentSet.add(word.toLowerCase());
+                currentSet.add(word.toUpperCase());
+                currentSet.add(normalize(translit(word.toLowerCase())));
             }
 
             let tempArr = Array.from(currentSet);
@@ -130,11 +132,24 @@
                 const suffixes = /(ات|ون|ين|ان|ها|هم|كم|نا|ي)$/;
                 if (v.match(suffixes)) {
                     let stripped = v.replace(suffixes, "");
-                    if (stripped.length > 1) currentSet.add(stripped);
+                    if (stripped.length > 1) {
+                        currentSet.add(stripped);
+                        currentSet.add(stripped + "ات");
+                        currentSet.add(stripped + "ين");
+                    }
+                } else if (v.length > 2 && !/[a-zA-Z]/.test(v)) {
+                    if (v.endsWith("ة") || v.endsWith("ه")) {
+                        let root = v.slice(0, -1);
+                        currentSet.add(root + "ات");
+                    } else {
+                        currentSet.add(v + "ات");
+                        currentSet.add(v + "ون");
+                        currentSet.add(v + "ين");
+                    }
                 }
             });
 
-            let finalGroup = Array.from(currentSet).filter(v => v.length > 1 || /^[a-z0-9]+$/i.test(v));
+            let finalGroup = Array.from(currentSet).filter(v => v.length > 1 || /^[a-zA-Z0-9]+$/.test(v));
             if (finalGroup.length > 0) {
                 groupedVariants.push(finalGroup);
             }
@@ -151,11 +166,11 @@
         
         window.searchVariants.forEach((group, index) => {
             group.forEach(v => {
-                tableData.push({ "المجموعة (الكلمة الأساسية)": index + 1, "الاحتمال اللغوي (Variant)": v });
+                tableData.push({ "Group (Index)": index + 1, "Generated Variant": v });
             });
         });
 
-        console.groupCollapsed("%c🔎 الكلمات الدلالية المرسلة لمحرك البحث (اضغط للفتح)", "color: #ff6000; font-size: 14px; font-weight: bold;");
+        console.groupCollapsed("%c[Linguistic Engine] Generated Query Tokens", "color: #ff6000; font-size: 13px; font-weight: bold;");
         console.table(tableData);
         console.groupEnd();
 
@@ -177,12 +192,12 @@
             gridRows.push(bloomArray.slice(i * 64, (i + 1) * 64).join(''));
         }
 
-        console.groupCollapsed("%c🧮 خريطة البلوم فلتر (Bloom Filter Memory Grid - 2048 bits)", "color: #08c; font-size: 14px; font-weight: bold;");
+        console.groupCollapsed("%c[Bloom Filter] Matrix Representation (2048 bits)", "color: #08c; font-size: 13px; font-weight: bold;");
         console.log(
             "%c" + gridRows.join('\n'), 
             "background: #0d1117; color: #3fb950; font-family: 'Courier New', Courier, monospace; font-size: 11px; line-height: 1.1; letter-spacing: 4px; padding: 15px; border-radius: 8px; border: 1px solid #30363d;"
         );
-        console.log("%cمؤشرات البتات المفعلة (Indexes):", "color: #e34c26; font-weight: bold;", Array.from(activeBitsSet).sort((a,b)=>a-b).join(', '));
+        console.log("%cActive Indexes:", "color: #e34c26; font-weight: bold;", Array.from(activeBitsSet).sort((a,b)=>a-b).join(', '));
         console.groupEnd();
     }
 })();
