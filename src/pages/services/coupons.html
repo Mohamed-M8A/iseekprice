@@ -6,15 +6,25 @@
 <link rel="icon" type="image/x-icon" href="https://www.iseekprice.com/public/assets/static/favicon.ico">    
 <link href='/public/css/main.css' rel='stylesheet'/> 
 <link href='/public/css/product.css' rel='stylesheet'/> 
-<script src='/public/js/worker.js'></script>  
-<script src='/public/js/grid.js'></script>  
+<script defer src='/public/js/worker.js'></script>  
+<script defer src='/public/js/grid.js'></script>  
 <script defer src='/public/js/corepress.js'></script>    
 <script defer src='/public/js/search.js'></script>
 <title>كوبونات الخصم والعروض الحصرية</title>
 <style>
-  
-.coupon-hero{background:linear-gradient(135deg,#d93025 0%,#ff5252 100%);color:#fff;padding:40px 20px;text-align:center;border-radius:12px;margin:20px auto;max-width:1200px}.coupon-hero h1{margin:0;font-size:26px}.coupon-hero p{margin:10px 0 0;opacity:.9}.product-grid{margin-top:20px}.post-card.title-link{border:1px dashed #d93025}
-  
+    .coupon-hero {
+        background: linear-gradient(135deg, #d93025 0%, #ff5252 100%);
+        color: white;
+        padding: 40px 20px;
+        text-align: center;
+        border-radius: 12px;
+        margin: 20px auto;
+        max-width: 1200px;
+    }
+    .coupon-hero h1 { margin: 0; font-size: 26px; }
+    .coupon-hero p { margin: 10px 0 0; opacity: 0.9; }
+    .product-grid { margin-top: 20px; }
+    .post-card.title-link { border: 1px dashed #d93025; }
 </style>
 </head>
 <body>
@@ -38,7 +48,6 @@
         <h1>كوبونات خصم حصرية</h1>
         <p>تسوق أفضل المنتجات التي تحتوي على عروض ترويجية وأكواد خصم فعالة</p>
     </div>
-
     <div id="souq-widget-root"></div>
 </main>
 
@@ -93,7 +102,13 @@
             if (e.data.type === 'BATCH') {
                 loader.style.display = 'none';
                 e.data.feed.forEach((val, key) => storeData.feed.set(key, val));
-                storeData.core.push(...e.data.batch);
+
+                const filteredBatch = e.data.batch.filter(item => {
+                    const feed = e.data.feed.get(item.id);
+                    return feed && (feed.original > feed.price || feed.status.promo === 1);
+                });
+
+                storeData.core.push(...filteredBatch);
 
                 if (!initialRenderDone && storeData.core.length >= WIDGET_CONFIG.INITIAL_SIZE) {
                     renderBatch();
@@ -103,7 +118,7 @@
                 isFullyLoaded = true;
                 loader.style.display = 'none';
                 if (storeData.core.length === 0) {
-                    grid.innerHTML = '<div style="text-align:center;padding:40px;">لا توجد كوبونات متاحة حالياً</div>';
+                    grid.innerHTML = '<div style="text-align:center;padding:40px;">لا توجد عروض حصرية متاحة حالياً</div>';
                 } else if (!initialRenderDone) {
                     renderBatch();
                 }
