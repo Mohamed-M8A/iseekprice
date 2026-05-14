@@ -7,20 +7,19 @@
     <link rel="icon" type="image/x-icon" href="https://www.iseekprice.com/public/assets/static/favicon.ico">
     <link href='/public/css/style.min.css' rel='stylesheet'/> 
     <style>
-        .search-layout-wrapper{display:flex;gap:20px;padding:20px;align-items:flex-start;max-width:1400px;margin:0 auto}
-        .search-sidebar{width:280px;flex-shrink:0;background:#fff;border-radius:12px;border:1px solid #eee;padding:20px;min-height:450px;position:sticky;top:20px;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,0.03)}
-        #results-area{flex:1}
-        .mobile-filter-btn{display:none;position:fixed;bottom:30px;left:30px;z-index:9999;background:#febd69;color:#111;border:none;padding:12px 20px;border-radius:50px;box-shadow:0 6px 20px rgba(0,0,0,0.2);font-weight:900;cursor:pointer;font-size:14px;border:1px solid #f3a847;align-items:center;gap:8px}
+        .search-layout-wrapper{display:flex!important;gap:20px!important;padding:20px!important;align-items:flex-start!important;max-width:1450px!important;margin:0 auto!important;direction:rtl!important}
+        .search-sidebar{width:300px!important;flex-shrink:0!important;background:#fff!important;border-radius:12px!important;border:1px solid #e0e0e0!important;padding:20px!important;min-height:500px!important;position:sticky!important;top:20px!important;z-index:100!important;box-shadow:0 4px 12px rgba(0,0,0,0.05)!important}
+        #souq-widget-root{flex:1!important;min-width:0!important}
+        .mobile-filter-btn{display:none!important;position:fixed!important;bottom:25px!important;left:25px!important;z-index:9999!important;background:#131921!important;color:#fff!important;border:none!important;padding:12px 20px!important;border-radius:50px!important;box-shadow:0 8px 20px rgba(0,0,0,0.3)!important;font-weight:700!important;align-items:center!important;gap:8px!important;cursor:pointer!important}
         @media(max-width:992px){
-            .search-layout-wrapper{padding:12px}
-            .search-sidebar{position:fixed;right:-320px;top:0;height:100vh;z-index:10001;transition:right .3s cubic-bezier(0.4,0,0.2,1);box-shadow:-5px 0 25px rgba(0,0,0,0.15);width:300px;border-radius:0;overflow-y:auto}
-            .search-sidebar.active{right:0}
-            .mobile-filter-btn{display:flex}
+            .search-layout-wrapper{padding:10px!important}
+            .search-sidebar{position:fixed!important;right:-350px!important;top:0!important;height:100vh!important;z-index:10001!important;transition:right .4s cubic-bezier(0.4,0,0.2,1)!important;width:320px!important;border-radius:0!important;overflow-y:auto!important;box-shadow:-10px 0 30px rgba(0,0,0,0.2)!important}
+            .search-sidebar.active{right:0!important}
+            .mobile-filter-btn{display:flex!important}
+            #souq-widget-root{width:100%!important}
         }
-        body.dark-mode .search-sidebar{background:#1e1e1e;border-color:#333;color:#fff}
-        body.dark-mode .mobile-filter-btn{background:#232f3e;color:#fff;border-color:#37475a}
-        .sidebar-title{font-size:18px;font-weight:900;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #f1f1f1}
-        body.dark-mode .sidebar-title{border-bottom-color:#333}
+        body.dark-mode .search-sidebar{background:#1a1a1a!important;border-color:#333!important;color:#eee!important}
+        body.dark-mode .mobile-filter-btn{background:#333!important;border:1px solid #555!important}
     </style>
 </head>
 <body>
@@ -41,7 +40,7 @@
     
 <h2 class="main-headline" id="query-heading">جاري البحث...</h2>
 
-<main id="souq-widget-root">
+<main id="search-page-main">
     <button id="mobile-filter-trigger" class="mobile-filter-btn">
         <svg style="width:20px;height:20px" viewBox="0 0 24 24"><path fill="currentColor" d="M3,2H21V2H21V4H18L15,10V22H9V10L6,4H3V2M11,11V19H13V11L16,5H8L11,11Z" /></svg>
         تصفية النتائج
@@ -49,17 +48,15 @@
     
     <div class="search-layout-wrapper">
         <aside id="search-sidebar" class="search-sidebar">
-            <div class="sidebar-title">خيارات التصفية</div>
+            <h3 style="font-size:18px;font-weight:800;margin-bottom:20px;border-bottom:2px solid #febd69;padding-bottom:10px">تصفية البحث</h3>
+            <div id="sidebar-content"></div>
         </aside>
 
-        <section id="results-area">
-            <div id="product-grid-container"></div>
-        </section>
+        <section id="souq-widget-root"></section>
     </div>
 </main>
 
-<footer id='footer' itemscope='itemscope' itemtype='https://schema.org/WPFooter'>
-</footer>
+<footer id='footer' itemscope='itemscope' itemtype='https://schema.org/WPFooter'></footer>
     
 <script defer src='/public/js/worker.js'></script>  
 <script defer src='/public/js/grid.js'></script>  
@@ -78,10 +75,10 @@
         heading.innerText = "أحدث المنتجات";
     }
 
-    function generateVariants(text) {
+    function getVariants(text) {
         if (!text) return [];
         let allVariants = new Set();
-        let tokens = text.toLowerCase().split(/\s+/).filter(t => t.length > 1);
+        let words = text.toLowerCase().split(/\s+/).filter(w => w.length > 1);
 
         const normalize = (t) => {
             return t.replace(/[أإآ]/g, "ا")
@@ -89,7 +86,7 @@
                     .replace(/ـ/g, "");
         };
 
-        const transliterate = (t) => {
+        const translit = (t) => {
             const map = {
                 'a':'ا','b':'ب','t':'ت','s':'س','j':'ج','h':'ح','x':'خ','d':'د',
                 'r':'ر','z':'ز','c':'ص','f':'ف','q':'ق','k':'ك','l':'ل','m':'م',
@@ -98,33 +95,33 @@
             return t.split('').map(c => map[c] || c).join('');
         };
 
-        tokens.forEach(word => {
-            let wordSet = new Set();
+        words.forEach(word => {
+            let currentSet = new Set();
             let n = normalize(word);
-            wordSet.add(n);
+            currentSet.add(n);
 
             if (/[a-z]/i.test(n)) {
-                wordSet.add(normalize(transliterate(n)));
+                currentSet.add(normalize(translit(n)));
             }
 
-            let list = Array.from(wordSet);
-            list.forEach(v => {
-                if (v.startsWith("ال")) wordSet.add(v.substring(2));
-                else wordSet.add("ال" + v);
+            let tempArr = Array.from(currentSet);
+            tempArr.forEach(v => {
+                if (v.startsWith("ال")) currentSet.add(v.substring(2));
+                else currentSet.add("ال" + v);
             });
 
-            list = Array.from(wordSet);
-            list.forEach(v => {
-                if (v.endsWith("ة")) wordSet.add(v.slice(0, -1) + "ه");
-                if (v.endsWith("ه")) wordSet.add(v.slice(0, -1) + "ة");
+            tempArr = Array.from(currentSet);
+            tempArr.forEach(v => {
+                if (v.endsWith("ة")) currentSet.add(v.slice(0, -1) + "ه");
+                if (v.endsWith("ه")) currentSet.add(v.slice(0, -1) + "ة");
             });
 
-            list = Array.from(wordSet);
-            list.forEach(v => {
-                wordSet.add(v.replace(/(ات|ون|ين)$/, ""));
+            tempArr = Array.from(currentSet);
+            tempArr.forEach(v => {
+                currentSet.add(v.replace(/(ات|ون|ين)$/, ""));
             });
 
-            wordSet.forEach(v => {
+            currentSet.forEach(v => {
                 if (v.length > 1) allVariants.add(v);
             });
         });
@@ -132,25 +129,24 @@
         return Array.from(allVariants);
     }
 
-    window.searchVariants = generateVariants(query);
+    window.searchVariants = getVariants(query);
     
     if (window.searchVariants.length > 0) {
-        console.log("%c 🧠 لغويات البحث الذكي", "color: #ff6000; font-weight: 900; font-size: 16px;");
-        console.table(window.searchVariants.map((v, i) => ({ "المعرف": i + 1, "الكلمة المولدة": v })));
+        console.group("%c🔎 الكلمات الدلالية المرسلة لمحرك البحث (الوركر)", "color: #ff6000; font-size: 14px; font-weight: bold;");
+        console.table(window.searchVariants.map((v, i) => ({ "الترتيب": i + 1, "الكلمة (Variant)": v })));
+        console.groupEnd();
     }
 
     const trigger = document.getElementById('mobile-filter-trigger');
     const sidebar = document.getElementById('search-sidebar');
     const overlay = document.getElementById('widget-overlay');
 
-    if (trigger) {
+    if (trigger && sidebar && overlay) {
         trigger.onclick = function() {
             sidebar.classList.add('active');
-            if(overlay) overlay.style.display = 'block';
+            overlay.style.display = 'block';
         };
-    }
 
-    if (overlay) {
         overlay.onclick = function() {
             sidebar.classList.remove('active');
             overlay.style.display = 'none';
