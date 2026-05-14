@@ -74,7 +74,7 @@
 
     let synonymsDict = {};
     try {
-        const response = await fetch('/key.json');
+        const response = await fetch('/pages/services/key.json');
         if (response.ok) {
             synonymsDict = await response.json();
         }
