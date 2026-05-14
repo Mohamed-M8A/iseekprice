@@ -107,7 +107,7 @@
 
     let synonymsDict = {};
     try {
-        const response = await fetch('/pages/services/key.json');
+        const response = await fetch('/public/js/key.json?v=');
         if (response.ok) {
             synonymsDict = await response.json();
         }
