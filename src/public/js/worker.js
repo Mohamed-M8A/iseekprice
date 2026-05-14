@@ -50,13 +50,13 @@ class BinaryParser {
 }
 
 self.onmessage = async (e) => {
-    const { baseUrl, coreFile, metaFile, feedBuffer, query, storeId } = e.data;
+    const { baseUrl, coreFile, metaFile, feedBuffer, query, storeId, filters } = e.data;
     const decoder = new TextDecoder();
 
     try {
         if (!feedBuffer) throw new Error("Feed buffer required");
         const { map: feedMap, matchedIds: storeMatchedIds } = BinaryParser.parseFeed(feedBuffer, storeId ? parseInt(storeId) : null);
-        let allowedIds = storeId ? storeMatchedIds : null;
+        let searchScores = new Map();
 
         if (query && metaFile) {
             const metaRes = await fetch(baseUrl + metaFile);
@@ -64,26 +64,22 @@ self.onmessage = async (e) => {
                 const metaBuf = await metaRes.arrayBuffer();
                 const metaData = new Uint8Array(metaBuf);
                 const metaView = new DataView(metaBuf);
-                const searchMatchedIds = new Set();
                 
                 const queryGroups = Array.isArray(query) && Array.isArray(query[0]) ? query : [[query]];
-                
                 const groupedBits = queryGroups.map(group => {
                     return group.map(q => {
-                        let cleanQ = q.trim().toLowerCase();
+                        let cleanQ = q.trim(); 
                         let hA = BinaryParser.murmur(cleanQ, 42);
                         let hB = BinaryParser.murmur(cleanQ, 99);
                         let bits = [];
-                        for (let i = 0; i < 8; i++) {
-                            bits.push(Math.abs(hA + i * hB) % 2048);
-                        }
+                        for (let i = 0; i < 8; i++) bits.push(Math.abs(hA + i * hB) % 2048);
                         return bits;
                     });
                 });
 
                 for (let i = 0; i < metaData.length; i += 264) {
                     let id = metaView.getBigUint64(i, true);
-                    let productMatchesAllGroups = true;
+                    let score = 0;
 
                     for (let group of groupedBits) {
                         let groupMatched = false;
@@ -100,38 +96,77 @@ self.onmessage = async (e) => {
                                 break;
                             }
                         }
-                        if (!groupMatched) {
-                            productMatchesAllGroups = false;
-                            break;
-                        }
+                        if (groupMatched) score++;
                     }
-                    if (productMatchesAllGroups) searchMatchedIds.add(id);
+
+                    if (score > 0 && (!storeId || storeMatchedIds.has(id))) {
+                        searchScores.set(id, score);
+                    }
                 }
-                allowedIds = storeId ? new Set([...searchMatchedIds].filter(id => storeMatchedIds.has(id))) : searchMatchedIds;
             }
+        } else if (storeId) {
+            for (let id of storeMatchedIds) searchScores.set(id, 1);
         }
 
         const coreRes = await fetch(baseUrl + coreFile);
         const reader = coreRes.body.getReader();
         let leftover = new Uint8Array(0);
+        let allMatchedRecords = [];
 
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
             let combined = new Uint8Array(leftover.length + value.length);
             combined.set(leftover); combined.set(value, leftover.length);
-            let records = [];
             let offset = 0;
+            
             while (offset + 276 <= combined.length) {
                 const id = new DataView(combined.buffer, combined.byteOffset + offset, 8).getBigUint64(0, true);
-                if (feedMap.has(id) && (!allowedIds || allowedIds.has(id))) {
-                    records.push(BinaryParser.parseCoreRecord(combined, offset, decoder));
+                let isAllowed = (!query && !storeId) ? true : searchScores.has(id);
+                
+                if (isAllowed && feedMap.has(id)) {
+                    let feedData = feedMap.get(id);
+                    let passesFilters = true;
+
+                    if (filters) {
+                        if (filters.minPrice && feedData.price < filters.minPrice) passesFilters = false;
+                        if (filters.maxPrice && feedData.price > filters.maxPrice) passesFilters = false;
+                        if (filters.minRating && feedData.score < filters.minRating) passesFilters = false;
+                        if (filters.minOrders && feedData.orders < filters.minOrders) passesFilters = false;
+                        if (filters.hasPromo && feedData.status.promo === 0) passesFilters = false;
+                        if (filters.inStock && feedData.status.inStock === 0) passesFilters = false;
+                    }
+
+                    if (passesFilters) {
+                        let record = BinaryParser.parseCoreRecord(combined, offset, decoder);
+                        record.relevance = searchScores.get(id) || 0;
+                        allMatchedRecords.push(record);
+                    }
                 }
                 offset += 276;
             }
             leftover = combined.slice(offset);
-            if (records.length > 0) self.postMessage({ type: 'BATCH', batch: records, feed: feedMap });
         }
+
+        allMatchedRecords.sort((a, b) => {
+            let sortType = filters && filters.sortBy ? filters.sortBy : 'relevance';
+            let feedA = feedMap.get(a.id);
+            let feedB = feedMap.get(b.id);
+            
+            if (sortType === 'price_asc') return feedA.price - feedB.price;
+            if (sortType === 'price_desc') return feedB.price - feedA.price;
+            if (sortType === 'orders_desc') return feedB.orders - feedA.orders;
+            if (sortType === 'rating_desc') return feedB.score - feedA.score;
+            
+            if (b.relevance !== a.relevance) return b.relevance - a.relevance;
+            return (feedB ? feedB.orders : 0) - (feedA ? feedA.orders : 0);
+        });
+
+        const batchSize = 50;
+        for (let i = 0; i < allMatchedRecords.length; i += batchSize) {
+            self.postMessage({ type: 'BATCH', batch: allMatchedRecords.slice(i, i + batchSize), feed: feedMap });
+        }
+        
         self.postMessage({ type: 'DONE' });
     } catch (err) {
         self.postMessage({ type: 'ERROR', error: err.message });
