@@ -132,15 +132,14 @@ async function startWidget() {
 
         const mapRes = await fetch(`${WIDGET_CONFIG.BASE_URL}General/map.json?v=${Date.now()}`);
         window.fileMap = await mapRes.json();
-        const fileMap = window.fileMap;
         const country = localStorage.getItem("Cntry") || "SA";
-        const feedUrl = `${WIDGET_CONFIG.BASE_URL}${country}/feed_${fileMap.regions[country].feed}.bin`;
+        const feedUrl = `${WIDGET_CONFIG.BASE_URL}${country}/feed_${window.fileMap.regions[country].feed}.bin`;
         const feedRes = await fetch(feedUrl);
         window.sharedFeedBuffer = await feedRes.arrayBuffer();
 
-        const coreFile = `General/core_${fileMap.core}.bin`;
-        const metaFile = `General/meta_${fileMap.meta}.bin`;
-        const feedFile = fileMap.regions[country]?.feed ? `${country}/feed_${fileMap.regions[country].feed}.bin` : null;
+        const coreFile = `General/core_${window.fileMap.core}.bin`;
+        const metaFile = `General/meta_${window.fileMap.meta}.bin`;
+        const feedFile = window.fileMap.regions[country]?.feed ? `${country}/feed_${window.fileMap.regions[country].feed}.bin` : null;
 
         if (!feedFile) throw new Error("Region not found");
 
@@ -204,17 +203,30 @@ async function startWidget() {
             }
         };
 
-        worker.postMessage({
-            baseUrl: WIDGET_CONFIG.BASE_URL,
-            coreFile: coreFile,
-            metaFile: metaFile,
-            feedBuffer: window.sharedFeedBuffer,
-            query: window.searchVariants || rawQuery,
-            storeId: urlParams.get('store'),
-            filters: window.currentFilters || null
-        });
-
         loadMoreBtn.onclick = renderNextBatch;
+
+        window.triggerWorkerSearch = () => {
+            grid.innerHTML = '';
+            loader.style.display = 'flex';
+            loadMoreBtn.style.display = 'none';
+            storeData.core = [];
+            currentIndex = 0;
+            isFullyLoaded = false;
+            initialRenderDone = false;
+
+            worker.postMessage({
+                baseUrl: WIDGET_CONFIG.BASE_URL,
+                coreFile: coreFile,
+                metaFile: metaFile,
+                feedBuffer: window.sharedFeedBuffer,
+                query: window.searchVariants || rawQuery,
+                storeId: urlParams.get('store'),
+                filters: window.currentFilters || null
+            });
+        };
+
+        window.triggerWorkerSearch();
+
     } catch (err) {
         console.error(err);
     }
