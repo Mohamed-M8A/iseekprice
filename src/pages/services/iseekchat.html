@@ -56,11 +56,9 @@
 
 
 <script>
-const BASE_API = "https://api.iseekprice.com/";
 const WORKER_URL = 'https://iseek-ai.m7md20051968.workers.dev/';
 let db = null;
 let currentSessionId = localStorage.getItem('iseek_current_id') || null;
-let metaData = null;
 let pendingDeleteId = null;
 
 async function openDB() {
@@ -91,48 +89,11 @@ async function deleteSession(id) {
     db.transaction("sessions", "readwrite").objectStore("sessions").delete(id);
 }
 
-function murmur(s, seed) {
-    let h = seed ^ s.length;
-    for (let i = 0; i < s.length; i++) {
-        h = Math.imul(h ^ s.charCodeAt(i), 0x5bd1e995);
-        h = h ^ (h >>> 13);
-    }
-    return (h >>> 0);
-}
-
-async function loadEngine() {
-    try {
-        const rMap = await fetch(BASE_API + "General/map.json");
-        const map = await rMap.json();
-        const rMetaBin = await fetch(BASE_API + `General/meta_${map.meta}.bin`);
-        metaData = new Uint8Array(await rMetaBin.arrayBuffer());
-    } catch (e) {}
-}
-
-function getMatchedUIDs(q) {
-    if (!metaData) return [];
-    const tokens = q.toLowerCase().split(/\s+/).filter(t => t.length > 2);
-    if (!tokens.length) return [];
-    const matched = new Set();
-    const view = new DataView(metaData.buffer);
-    for (let t of tokens) {
-        const hA = murmur(t, 42); const hB = murmur(t, 99);
-        const bits = [];
-        for (let i = 0; i < 8; i++) bits.push(Math.abs(hA + i * hB) % 2048);
-        for (let i = 0; i < metaData.length; i += 264) {
-            let hit = true;
-            for (let b of bits) { if (!(metaData[i + 8 + Math.floor(b / 8)] & (1 << (b % 8)))) { hit = false; break; } }
-            if (hit) matched.add(view.getBigUint64(i, true));
-        }
-    }
-    return Array.from(matched).map(id => id.toString());
-}
-
 async function getCachedReply(question) {
     const sessions = await getAllSessions();
-    for(let s of sessions) {
-        for(let i=0; i < s.messages.length - 1; i++) {
-            if(s.messages[i].side === 'user' && s.messages[i].text === question && s.messages[i+1].side === 'bot') {
+    for (let s of sessions) {
+        for (let i = 0; i < s.messages.length - 1; i++) {
+            if (s.messages[i].side === 'user' && s.messages[i].text === question && s.messages[i+1].side === 'bot') {
                 return s.messages[i+1].text; 
             }
         }
@@ -191,14 +152,13 @@ async function handleSend() {
     document.getElementById('status-text').innerText = 'ISEEKPRICE AI';
 
     const cachedReply = await getCachedReply(text);
-    if(cachedReply) {
+    if (cachedReply) {
         displayMessage(cachedReply, 'bot');
         session.messages.push({ text: cachedReply, side: 'bot' });
         await saveSession(session);
         return;
     }
 
-    const matchedUIDs = getMatchedUIDs(text);
     const loading = document.createElement('div');
     loading.className = 'msg bot';
     loading.id = 'loading-msg';
@@ -208,7 +168,7 @@ async function handleSend() {
     try {
         const res = await fetch(WORKER_URL, {
             method: 'POST',
-            body: JSON.stringify({ prompt: text, userName: 'عميل', uids: matchedUIDs })
+            body: JSON.stringify({ prompt: text, userName: 'عميل' })
         });
         const data = await res.json();
         document.getElementById('loading-msg').remove();
