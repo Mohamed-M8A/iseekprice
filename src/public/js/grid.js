@@ -13,13 +13,16 @@ class Renderer {
         this.placeholder = placeholder;
         const activeCntry = localStorage.getItem("Cntry") || "SA";
         this.currencyConfig = COUNTRY_MAP[activeCntry] || COUNTRY_MAP["SA"];
+        
         this.observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.removeAttribute('data-src');
-                    this.observer.unobserve(img);
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                        this.observer.unobserve(img);
+                    }
                 }
             });
         }, { rootMargin: "150px" });
@@ -31,53 +34,37 @@ class Renderer {
 
     getDatePath(offset) {
         const d = new Date(Date.UTC(2025, 0, 1) + (offset * 86400000));
-        const y = d.getUTCFullYear();
-        const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(d.getUTCDate()).padStart(2, '0');
-        return `${y}/${m}/${day}`;
+        return `${d.getUTCFullYear()}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${String(d.getUTCDate()).padStart(2, '0')}`;
     }
 
     createCard(product, domain, feed) {
-        if (!product) return null;
+        if (!product || !feed) return null;
+        
         const card = document.createElement("a");
         card.href = `${domain}product/${product.slug}/`;
         card.className = "post-card title-link";
-        const symbol = this.currencyConfig.symbol;
         
+        const symbol = this.currencyConfig.symbol;
         const datePath = this.getDatePath(product.dateOffset);
         const imageUrl = `https://media.iseekprice.com/${datePath}/${product.id}_1.webp`;
         
-        let badgeHTML = '', metaHTML = '';
-        if (feed) {
-            const price = this.formatPriceDisplay(feed.price);
-            const original = this.formatPriceDisplay(feed.original);
-            const deliveryTime = (feed.delivery.min === feed.delivery.max || !feed.delivery.max) 
-                ? `${feed.delivery.min} يوم` 
-                : `${feed.delivery.max}-${feed.delivery.min} يوم`;
+        let badgeHTML = '';
+        const price = this.formatPriceDisplay(feed.price);
+        const original = this.formatPriceDisplay(feed.original);
+        const deliveryTime = (feed.delivery.min === feed.delivery.max || !feed.delivery.max) 
+            ? `${feed.delivery.min} يوم` 
+            : `${feed.delivery.max}-${feed.delivery.min} يوم`;
 
-            if (feed.status.inStock === 0) {
-                badgeHTML = '<div class="discount-badge out-of-stock">نفذت</div>';
-            } else if (feed.status.promo === 1) {
-                badgeHTML = '<div class="discount-badge promo">عرض خاص</div>';
-            } else if (feed.original > feed.price) {
-                const discount = Math.round(((feed.original - feed.price) / feed.original) * 100);
-                badgeHTML = `<div class="discount-badge">-${discount}%</div>`;
-            }
-            
-            metaHTML = `
-                <div class="price-display">
-                    <span class="discounted-price">${price} ${symbol}</span>
-                    ${feed.original > feed.price ? `<span class="original-price">${original} ${symbol}</span>` : ''}
-                </div>
-                <div class="product-meta-details">
-                    <div class="meta-item">★ ${feed.score}</div>
-                    <div class="meta-item">${feed.orders.toLocaleString()} تم بيع</div>
-                    <div class="meta-item">${deliveryTime}</div>
-                </div>`;
+        if (feed.status.inStock === 0) {
+            badgeHTML = '<div class="discount-badge out-of-stock">نفذت</div>';
+        } else if (feed.status.promo === 1) {
+            badgeHTML = '<div class="discount-badge promo">عرض خاص</div>';
+        } else if (feed.original > feed.price) {
+            const discount = Math.round(((feed.original - feed.price) / feed.original) * 100);
+            badgeHTML = `<div class="discount-badge">-${discount}%</div>`;
         }
         
         card.innerHTML = `
-            <span class="UID" style="display:none">${product.id}</span>
             <div class="image-container">
                 ${badgeHTML}
                 <img class="post-image" alt="${product.title}" src="${this.placeholder}" data-src="${imageUrl}">
@@ -87,7 +74,15 @@ class Renderer {
             </div>
             <div class="post-content">
                 <h3 class="post-title">${product.title}</h3>
-                ${metaHTML}
+                <div class="price-display">
+                    <span class="discounted-price">${price} ${symbol}</span>
+                    ${feed.original > feed.price ? `<span class="original-price">${original} ${symbol}</span>` : ''}
+                </div>
+                <div class="product-meta-details">
+                    <div class="meta-item">★ ${feed.score}</div>
+                    <div class="meta-item">${feed.orders.toLocaleString()} تم بيع</div>
+                    <div class="meta-item">${deliveryTime}</div>
+                </div>
             </div>`;
         
         const img = card.querySelector('.post-image');
@@ -121,27 +116,21 @@ async function startWidget() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const rawQuery = urlParams.get('query')?.trim();
-
+        
         if (rawQuery) {
             let attempts = 0;
             while (!window.searchVariants && attempts < 20) {
-                await new Promise(resolve => setTimeout(resolve, 50));
+                await new Promise(r => setTimeout(r, 50));
                 attempts++;
             }
         }
 
         const mapRes = await fetch(`${WIDGET_CONFIG.BASE_URL}General/map.json?v=${Date.now()}`);
-        window.fileMap = await mapRes.json();
+        const fileMap = await mapRes.json();
         const country = localStorage.getItem("Cntry") || "SA";
-        const feedUrl = `${WIDGET_CONFIG.BASE_URL}${country}/feed_${window.fileMap.regions[country].feed}.bin`;
-        const feedRes = await fetch(feedUrl);
-        window.sharedFeedBuffer = await feedRes.arrayBuffer();
-
-        const coreFile = `General/core_${window.fileMap.core}.bin`;
-        const metaFile = `General/meta_${window.fileMap.meta}.bin`;
-        const feedFile = window.fileMap.regions[country]?.feed ? `${country}/feed_${window.fileMap.regions[country].feed}.bin` : null;
-
-        if (!feedFile) throw new Error("Region not found");
+        
+        const feedRes = await fetch(`${WIDGET_CONFIG.BASE_URL}${country}/feed_${fileMap.regions[country].feed}.bin`);
+        const feedBuffer = await feedRes.arrayBuffer();
 
         root.innerHTML = `
             <div id="product-posts" class="product-grid"></div>
@@ -156,12 +145,11 @@ async function startWidget() {
         let storeData = { core: [], feed: new Map() };
         let currentIndex = 0;
         let isFullyLoaded = false;
-        let initialRenderDone = false;
 
         const blob = new Blob([workerCode], { type: 'application/javascript' });
         const worker = new Worker(URL.createObjectURL(blob));
 
-        const renderNextBatch = () => {
+        const displayBatch = () => {
             const size = (currentIndex === 0) ? WIDGET_CONFIG.INITIAL_SIZE : WIDGET_CONFIG.BATCH_SIZE;
             const limit = Math.min(currentIndex + size, storeData.core.length);
             const batch = storeData.core.slice(currentIndex, limit);
@@ -171,11 +159,7 @@ async function startWidget() {
                 currentIndex = limit;
             }
             
-            if (isFullyLoaded && currentIndex >= storeData.core.length) {
-                loadMoreBtn.style.display = 'none';
-            } else if (storeData.core.length > currentIndex) {
-                loadMoreBtn.style.display = 'block';
-            }
+            loadMoreBtn.style.display = (currentIndex < storeData.core.length) ? 'block' : 'none';
         };
 
         worker.onmessage = (e) => {
@@ -184,42 +168,38 @@ async function startWidget() {
                 storeData.feed = e.data.feed;
                 storeData.core.push(...e.data.batch);
 
-                if (!initialRenderDone && storeData.core.length >= WIDGET_CONFIG.INITIAL_SIZE) {
-                    renderNextBatch();
-                    initialRenderDone = true;
+                if (currentIndex === 0 && storeData.core.length >= WIDGET_CONFIG.INITIAL_SIZE) {
+                    displayBatch();
                 }
             } else if (e.data.type === 'DONE') {
                 isFullyLoaded = true;
                 loader.style.display = 'none';
                 if (storeData.core.length === 0) {
                     grid.innerHTML = '<div class="no-results">لا توجد نتائج تطابق بحثك</div>';
-                } else {
-                    if (!initialRenderDone) renderNextBatch();
-                    if (currentIndex < storeData.core.length) loadMoreBtn.style.display = 'block';
+                } else if (currentIndex === 0) {
+                    displayBatch();
                 }
-            } else if (e.data.type === 'ERROR') {
-                loader.style.display = 'none';
-                grid.innerHTML = '<div class="error-msg">حدث خطأ أثناء تحميل البيانات</div>';
+                loadMoreBtn.style.display = (currentIndex < storeData.core.length) ? 'block' : 'none';
             }
         };
 
-        loadMoreBtn.onclick = renderNextBatch;
+        loadMoreBtn.onclick = displayBatch;
 
         window.triggerWorkerSearch = () => {
             grid.innerHTML = '';
             loader.style.display = 'flex';
             loadMoreBtn.style.display = 'none';
             storeData.core = [];
+            storeData.feed = new Map();
             currentIndex = 0;
             isFullyLoaded = false;
-            initialRenderDone = false;
 
             worker.postMessage({
                 baseUrl: WIDGET_CONFIG.BASE_URL,
-                coreFile: coreFile,
-                metaFile: metaFile,
-                feedBuffer: window.sharedFeedBuffer,
-                query: window.searchVariants || rawQuery,
+                coreFile: `General/core_${fileMap.core}.bin`,
+                metaFile: `General/meta_${fileMap.meta}.bin`,
+                feedBuffer: feedBuffer,
+                query: window.searchVariants || (rawQuery ? [[rawQuery]] : null),
                 storeId: urlParams.get('store'),
                 filters: window.currentFilters || null
             });
@@ -228,7 +208,8 @@ async function startWidget() {
         window.triggerWorkerSearch();
 
     } catch (err) {
-        console.error(err);
+        console.error("Widget Error:", err);
     }
 }
+
 document.addEventListener("DOMContentLoaded", startWidget);
