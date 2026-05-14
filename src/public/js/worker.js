@@ -43,8 +43,8 @@ class BinaryParser {
         return {
             id: view.getBigUint64(0, true),
             dateOffset: view.getUint32(8, true),
-            slug: decoder.decode(uint8.subarray(offset + 12, offset + 76)).replace(/\\0/g, '').trim(),
-            title: decoder.decode(uint8.subarray(offset + 76, offset + 276)).replace(/\\0/g, '').trim()
+            slug: decoder.decode(uint8.subarray(offset + 12, offset + 76)).replace(/\0/g, '').trim(),
+            title: decoder.decode(uint8.subarray(offset + 76, offset + 276)).replace(/\0/g, '').trim()
         };
     }
 }
@@ -57,15 +57,16 @@ self.onmessage = async (e) => {
         if (!feedBuffer) throw new Error("Feed buffer required");
         const { map: feedMap, matchedIds: storeMatchedIds } = BinaryParser.parseFeed(feedBuffer, storeId ? parseInt(storeId) : null);
         let searchScores = new Map();
+        const hasActiveQuery = Array.isArray(query) && query.length > 0;
 
-        if (query && metaFile) {
+        if (hasActiveQuery && metaFile) {
             const metaRes = await fetch(baseUrl + metaFile);
             if (metaRes.ok) {
                 const metaBuf = await metaRes.arrayBuffer();
                 const metaData = new Uint8Array(metaBuf);
                 const metaView = new DataView(metaBuf);
                 
-                const queryGroups = Array.isArray(query) && Array.isArray(query[0]) ? query : [[query]];
+                const queryGroups = Array.isArray(query[0]) ? query : [query];
                 const groupedBits = queryGroups.map(group => {
                     return group.map(q => {
                         let cleanQ = q.trim(); 
@@ -80,7 +81,6 @@ self.onmessage = async (e) => {
                 for (let i = 0; i < metaData.length; i += 264) {
                     let id = metaView.getBigUint64(i, true);
                     let score = 0;
-
                     for (let group of groupedBits) {
                         let groupMatched = false;
                         for (let bits of group) {
@@ -91,14 +91,10 @@ self.onmessage = async (e) => {
                                     break;
                                 }
                             }
-                            if (variantMatch) {
-                                groupMatched = true;
-                                break;
-                            }
+                            if (variantMatch) { groupMatched = true; break; }
                         }
                         if (groupMatched) score++;
                     }
-
                     if (score > 0 && (!storeId || storeMatchedIds.has(id))) {
                         searchScores.set(id, score);
                     }
@@ -122,21 +118,18 @@ self.onmessage = async (e) => {
             
             while (offset + 276 <= combined.length) {
                 const id = new DataView(combined.buffer, combined.byteOffset + offset, 8).getBigUint64(0, true);
-                let isAllowed = (!query && !storeId) ? true : searchScores.has(id);
+                let isAllowed = (!hasActiveQuery && !storeId) ? true : searchScores.has(id);
                 
                 if (isAllowed && feedMap.has(id)) {
                     let feedData = feedMap.get(id);
                     let passesFilters = true;
-
                     if (filters) {
                         if (filters.minPrice && feedData.price < filters.minPrice) passesFilters = false;
                         if (filters.maxPrice && feedData.price > filters.maxPrice) passesFilters = false;
                         if (filters.minRating && feedData.score < filters.minRating) passesFilters = false;
-                        if (filters.minOrders && feedData.orders < filters.minOrders) passesFilters = false;
                         if (filters.hasPromo && feedData.status.promo === 0) passesFilters = false;
                         if (filters.inStock && feedData.status.inStock === 0) passesFilters = false;
                     }
-
                     if (passesFilters) {
                         let record = BinaryParser.parseCoreRecord(combined, offset, decoder);
                         record.relevance = searchScores.get(id) || 0;
@@ -158,7 +151,9 @@ self.onmessage = async (e) => {
             if (sortType === 'orders_desc') return feedB.orders - feedA.orders;
             if (sortType === 'rating_desc') return feedB.score - feedA.score;
             
-            if (b.relevance !== a.relevance) return b.relevance - a.relevance;
+            if (hasActiveQuery) {
+                if (b.relevance !== a.relevance) return b.relevance - a.relevance;
+            }
             return (feedB ? feedB.orders : 0) - (feedA ? feedA.orders : 0);
         });
 
@@ -166,7 +161,6 @@ self.onmessage = async (e) => {
         for (let i = 0; i < allMatchedRecords.length; i += batchSize) {
             self.postMessage({ type: 'BATCH', batch: allMatchedRecords.slice(i, i + batchSize), feed: feedMap });
         }
-        
         self.postMessage({ type: 'DONE' });
     } catch (err) {
         self.postMessage({ type: 'ERROR', error: err.message });
