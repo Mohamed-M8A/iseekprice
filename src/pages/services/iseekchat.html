@@ -52,9 +52,6 @@
 </div>
 
 <script>
-/* =========================================
-   [1] CONFIGURATION & STATE
-   ========================================= */
 const BASE_API = "https://api.iseekprice.com/";
 const WORKER_URL = 'https://iseek-ai.m7md20051968.workers.dev/';
 let db = null;
@@ -62,9 +59,6 @@ let currentSessionId = localStorage.getItem('iseek_current_id') || null;
 let metaData = null;
 let pendingDeleteId = null;
 
-/* =========================================
-   [2] INDEXED DB LOGIC
-   ========================================= */
 async function openDB() {
     return new Promise((resolve, reject) => {
         const req = indexedDB.open("ISeekChatDB", 1);
@@ -90,9 +84,6 @@ async function deleteSession(id) {
     db.transaction("sessions", "readwrite").objectStore("sessions").delete(id);
 }
 
-/* =========================================
-   [3] ENGINE & SEARCH LOGIC
-   ========================================= */
 function murmur(s, seed) {
     let h = seed ^ s.length;
     for (let i = 0; i < s.length; i++) {
@@ -108,7 +99,7 @@ async function loadEngine() {
         const map = await rMap.json();
         const rMetaBin = await fetch(BASE_API + `General/meta_${map.meta}.bin`);
         metaData = new Uint8Array(await rMetaBin.arrayBuffer());
-    } catch (e) { console.log("Engine Load Skipped/Failed"); }
+    } catch (e) {}
 }
 
 function getMatchedUIDs(q) {
@@ -130,9 +121,6 @@ function getMatchedUIDs(q) {
     return Array.from(matched).map(id => id.toString());
 }
 
-/* =========================================
-   [4] UI & CHAT MANAGEMENT
-   ========================================= */
 async function renderChatList() {
     const list = document.getElementById('chat-list');
     list.innerHTML = '';
@@ -187,9 +175,6 @@ function displayMessage(text, side) {
     box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' });
 }
 
-/* =========================================
-   [5] SMART LOGIC (CACHE & INTENT & SEND)
-   ========================================= */
 document.getElementById('user-input').addEventListener('input', (e) => {
     const val = e.target.value.toLowerCase();
     const dot = document.getElementById('status-dot');
@@ -269,72 +254,51 @@ document.getElementById('user-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
 });
 
-/* =========================================
-   [6] CLOUDFLARE-STYLE GRID CANVAS
-   ========================================= */
 const canvas = document.getElementById('bg-canvas');
 const ctx = canvas.getContext('2d');
 let gridDots = [];
-const spacing = 32; // المسافة بين النقاط المنتظمة
-const hoverRadius = 220; // النطاق الواسع لتأثير الماوس
+const gridSpacing = 28; 
+const dotRadius = 1.2; 
+const hoverRadius = 400; 
 let mouse = { x: -1000, y: -1000 };
 
 function initCanvas() {
     canvas.width = window.innerWidth; 
     canvas.height = window.innerHeight;
     gridDots = [];
-    
-    // إنشاء شبكة النقاط المنتظمة لتغطية الشاشة كاملة
-    for (let x = 0; x <= canvas.width + spacing; x += spacing) {
-        for (let y = 0; y <= canvas.height + spacing; y += spacing) {
-            gridDots.push({ x, y, baseSize: 1.2 }); // حجم النقطة صغير جداً
+    for (let x = 0; x < canvas.width; x += gridSpacing) {
+        for (let y = 0; y < canvas.height; y += gridSpacing) {
+            gridDots.push({ x, y });
         }
     }
 }
 
-window.addEventListener('mousemove', (e) => { 
-    mouse.x = e.clientX; 
-    mouse.y = e.clientY; 
-});
-// إخفاء التأثير عند خروج الماوس من الشاشة
-window.addEventListener('mouseout', () => { 
-    mouse.x = -1000; 
-    mouse.y = -1000; 
-});
+window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+window.addEventListener('mouseout', () => { mouse.x = -1000; mouse.y = -1000; });
 
 function animateCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    gridDots.forEach(dot => {
-        let dist = Math.hypot(mouse.x - dot.x, mouse.y - dot.y);
+    ctx.beginPath();
+    for (let i = 0; i < gridDots.length; i++) {
+        let p = gridDots[i];
+        let dist = Math.hypot(mouse.x - p.x, mouse.y - p.y);
         
-        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.arc(p.x, p.y, dotRadius, 0, Math.PI * 2);
+        
         if (dist < hoverRadius) {
-            // حساب قوة التأثير بناءً على القرب من الماوس (1 = الأقرب، 0 = الأبعد)
-            let intensity = 1 - (dist / hoverRadius);
-            
-            // زيادة الحجم بشكل طفيف جداً مع توهج اللون البرتقالي
-            ctx.arc(dot.x, dot.y, dot.baseSize + (intensity * 1.5), 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(224, 122, 31, ${intensity})`; // اللون البرتقالي المعتمد
-            
-            // إضافة توهج (Glow) حول النقطة المضيئة
-            ctx.shadowBlur = intensity * 15;
-            ctx.shadowColor = `rgba(224, 122, 31, ${intensity})`;
+            let intensity = Math.pow(1 - dist / hoverRadius, 2); 
+            ctx.fillStyle = `rgba(224, 122, 31, ${0.05 + (intensity * 0.8)})`;
         } else {
-            // الحالة الطبيعية للنقطة (رمادي خافت جداً، غير مزعج)
-            ctx.arc(dot.x, dot.y, dot.baseSize, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
-            ctx.shadowBlur = 0;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.04)'; 
         }
         ctx.fill();
-    });
-    
+        ctx.beginPath(); 
+    }
     requestAnimationFrame(animateCanvas);
 }
 
-/* =========================================
-   [7] INITIALIZATION
-   ========================================= */
 window.onload = async () => {
     initCanvas(); animateCanvas(); window.addEventListener('resize', initCanvas);
     await openDB();
