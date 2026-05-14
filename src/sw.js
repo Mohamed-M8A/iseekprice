@@ -32,7 +32,7 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  if (url.pathname.endsWith('.bin')) {
+  if (url.pathname.endsWith('.bin') || url.pathname.endsWith('.map.json')) {
     return;
   }
 
