@@ -7,19 +7,21 @@
     <link rel="icon" type="image/x-icon" href="https://www.iseekprice.com/public/assets/static/favicon.ico">
     <link href='/public/css/style.min.css' rel='stylesheet'/> 
     <style>
-        .search-layout-wrapper{display:flex!important;gap:20px!important;padding:20px!important;align-items:flex-start!important;max-width:1450px!important;margin:0 auto!important;direction:rtl!important}
-        .search-sidebar{width:300px!important;flex-shrink:0!important;background:#fff!important;border-radius:12px!important;border:1px solid #e0e0e0!important;padding:20px!important;min-height:500px!important;position:sticky!important;top:20px!important;z-index:100!important;box-shadow:0 4px 12px rgba(0,0,0,0.05)!important}
-        #souq-widget-root{flex:1!important;min-width:0!important}
-        .mobile-filter-btn{display:none!important;position:fixed!important;bottom:25px!important;left:25px!important;z-index:9999!important;background:#131921!important;color:#fff!important;border:none!important;padding:12px 20px!important;border-radius:50px!important;box-shadow:0 8px 20px rgba(0,0,0,0.3)!important;font-weight:700!important;align-items:center!important;gap:8px!important;cursor:pointer!important}
-        @media(max-width:992px){
-            .search-layout-wrapper{padding:10px!important}
-            .search-sidebar{position:fixed!important;right:-350px!important;top:0!important;height:100vh!important;z-index:10001!important;transition:right .4s cubic-bezier(0.4,0,0.2,1)!important;width:320px!important;border-radius:0!important;overflow-y:auto!important;box-shadow:-10px 0 30px rgba(0,0,0,0.2)!important}
-            .search-sidebar.active{right:0!important}
-            .mobile-filter-btn{display:flex!important}
-            #souq-widget-root{width:100%!important}
+        body, html { margin: 0; padding: 0; overflow-x: hidden; }
+        #search-page-main { width: 100%; display: block !important; visibility: visible !important; }
+        .search-layout-wrapper { display: flex !important; gap: 20px !important; padding: 20px !important; align-items: flex-start !important; max-width: 1450px !important; margin: 0 auto !important; direction: rtl !important; flex-wrap: nowrap !important; }
+        .search-sidebar { width: 300px !important; flex-shrink: 0 !important; background: #fff !important; border-radius: 12px !important; border: 1px solid #e0e0e0 !important; padding: 20px !important; min-height: 500px !important; position: sticky !important; top: 20px !important; z-index: 100 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; display: block !important; }
+        #souq-widget-root { flex-grow: 1 !important; min-width: 0 !important; display: block !important; width: 100% !important; }
+        .mobile-filter-btn { display: none !important; position: fixed !important; bottom: 25px !important; left: 25px !important; z-index: 9999 !important; background: #131921 !important; color: #fff !important; border: none !important; padding: 12px 20px !important; border-radius: 50px !important; box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important; font-weight: 700 !important; align-items: center !important; gap: 8px !important; cursor: pointer !important; }
+        @media(max-width: 992px) {
+            .search-layout-wrapper { padding: 10px !important; display: block !important; }
+            .search-sidebar { position: fixed !important; right: -350px !important; top: 0 !important; height: 100vh !important; z-index: 10001 !important; transition: right .4s cubic-bezier(0.4,0,0.2,1) !important; width: 320px !important; border-radius: 0 !important; overflow-y: auto !important; box-shadow: -10px 0 30px rgba(0,0,0,0.2) !important; display: block !important; }
+            .search-sidebar.active { right: 0 !important; }
+            .mobile-filter-btn { display: flex !important; }
+            #souq-widget-root { width: 100% !important; display: block !important; }
         }
-        body.dark-mode .search-sidebar{background:#1a1a1a!important;border-color:#333!important;color:#eee!important}
-        body.dark-mode .mobile-filter-btn{background:#333!important;border:1px solid #555!important}
+        body.dark-mode .search-sidebar { background: #1a1a1a !important; border-color: #333 !important; color: #eee !important; }
+        body.dark-mode .mobile-filter-btn { background: #333 !important; border: 1px solid #555 !important; }
     </style>
 </head>
 <body>
@@ -129,11 +131,33 @@
         return Array.from(allVariants);
     }
 
+    function murmur(str, seed) {
+        let h = seed ^ str.length;
+        for (let i = 0; i < str.length; i++) {
+            h = Math.imul(h ^ str.charCodeAt(i), 0x5bd1e995);
+            h = h ^ (h >>> 13);
+        }
+        return h >>> 0;
+    }
+
     window.searchVariants = getVariants(query);
     
     if (window.searchVariants.length > 0) {
-        console.group("%c🔎 الكلمات الدلالية المرسلة لمحرك البحث (الوركر)", "color: #ff6000; font-size: 14px; font-weight: bold;");
-        console.table(window.searchVariants.map((v, i) => ({ "الترتيب": i + 1, "الكلمة (Variant)": v })));
+        console.group("%c🔎 الكلمات الدلالية والبصمة الرقمية (Bloom Filter)", "color: #ff6000; font-size: 14px; font-weight: bold;");
+        
+        let bitMatrix = window.searchVariants.map(v => {
+            let hA = murmur(v, 42);
+            let hB = murmur(v, 99);
+            let rowObj = { "الكلمة": v };
+            
+            for (let i = 0; i < 8; i++) {
+                let bitPos = Math.abs(hA + i * hB) % 2048;
+                rowObj[`بت ${i + 1}`] = `⬜ ${bitPos}`;
+            }
+            return rowObj;
+        });
+
+        console.table(bitMatrix);
         console.groupEnd();
     }
 
