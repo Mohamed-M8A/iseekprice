@@ -66,35 +66,46 @@ self.onmessage = async (e) => {
                 const metaView = new DataView(metaBuf);
                 const searchMatchedIds = new Set();
                 
-                const queries = Array.isArray(query) ? query : [query];
-                const allQueriesBits = queries.map(q => {
-                    let cleanQ = q.trim().toLowerCase();
-                    let hA = BinaryParser.murmur(cleanQ, 42);
-                    let hB = BinaryParser.murmur(cleanQ, 99);
-                    let bits = [];
-                    for (let i = 0; i < 8; i++) {
-                        bits.push(Math.abs(hA + i * hB) % 2048);
-                    }
-                    return bits;
+                const queryGroups = Array.isArray(query) && Array.isArray(query[0]) ? query : [[query]];
+                
+                const groupedBits = queryGroups.map(group => {
+                    return group.map(q => {
+                        let cleanQ = q.trim().toLowerCase();
+                        let hA = BinaryParser.murmur(cleanQ, 42);
+                        let hB = BinaryParser.murmur(cleanQ, 99);
+                        let bits = [];
+                        for (let i = 0; i < 8; i++) {
+                            bits.push(Math.abs(hA + i * hB) % 2048);
+                        }
+                        return bits;
+                    });
                 });
 
                 for (let i = 0; i < metaData.length; i += 264) {
                     let id = metaView.getBigUint64(i, true);
-                    let recordMatched = false;
-                    for (let bits of allQueriesBits) {
-                        let match = true;
-                        for (let b of bits) {
-                            if (!(metaData[i + 8 + Math.floor(b / 8)] & (1 << (b % 8)))) {
-                                match = false;
+                    let productMatchesAllGroups = true;
+
+                    for (let group of groupedBits) {
+                        let groupMatched = false;
+                        for (let bits of group) {
+                            let variantMatch = true;
+                            for (let b of bits) {
+                                if (!(metaData[i + 8 + Math.floor(b / 8)] & (1 << (b % 8)))) {
+                                    variantMatch = false;
+                                    break;
+                                }
+                            }
+                            if (variantMatch) {
+                                groupMatched = true;
                                 break;
                             }
                         }
-                        if (match) {
-                            recordMatched = true;
+                        if (!groupMatched) {
+                            productMatchesAllGroups = false;
                             break;
                         }
                     }
-                    if (recordMatched) searchMatchedIds.add(id);
+                    if (productMatchesAllGroups) searchMatchedIds.add(id);
                 }
                 allowedIds = storeId ? new Set([...searchMatchedIds].filter(id => storeMatchedIds.has(id))) : searchMatchedIds;
             }
