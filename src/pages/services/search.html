@@ -142,7 +142,7 @@
         console.table(window.searchVariants.map((v, i) => ({ "الترتيب": i + 1, "الكلمة (Variant)": v })));
         console.groupEnd();
 
-        let bloomArray = new Array(2048).fill('⬛');
+        let bloomArray = new Array(2048).fill('·');
         let activeBitsSet = new Set();
 
         window.searchVariants.forEach(q => {
@@ -150,7 +150,7 @@
             let hB = murmur(q, 99);
             for (let i = 0; i < 8; i++) {
                 let bitPos = Math.abs(hA + i * hB) % 2048;
-                bloomArray[bitPos] = '⬜';
+                bloomArray[bitPos] = '█';
                 activeBitsSet.add(bitPos);
             }
         });
@@ -160,9 +160,12 @@
             gridRows.push(bloomArray.slice(i * 64, (i + 1) * 64).join(''));
         }
 
-        console.groupCollapsed("%c خريطة البلوم فلتر (Bloom Filter Grid - 2048 bits)", "color: #08c; font-size: 14px; font-weight: bold;");
-        console.log("%c" + gridRows.join('\n'), "font-family: monospace; line-height: 1.1; letter-spacing: 1px; font-size: 10px;");
-        console.log("%cالبتات المفعلة:", "color: #2ecc71; font-weight: bold;", Array.from(activeBitsSet).sort((a,b)=>a-b).join(', '));
+        console.groupCollapsed("%c🧮 خريطة البلوم فلتر (Bloom Filter Memory Grid - 2048 bits)", "color: #08c; font-size: 14px; font-weight: bold;");
+        console.log(
+            "%c" + gridRows.join('\n'), 
+            "background: #0d1117; color: #3fb950; font-family: 'Courier New', Courier, monospace; font-size: 11px; line-height: 1.1; letter-spacing: 4px; padding: 15px; border-radius: 8px; border: 1px solid #30363d;"
+        );
+        console.log("%cمؤشرات البتات المفعلة (Indexes):", "color: #e34c26; font-weight: bold;", Array.from(activeBitsSet).sort((a,b)=>a-b).join(', '));
         console.groupEnd();
     }
 
