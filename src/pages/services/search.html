@@ -6,20 +6,7 @@
     <title>البحث</title>
     <link rel="icon" type="image/x-icon" href="https://www.iseekprice.com/public/assets/static/favicon.ico">
     <link href='/public/css/style.min.css' rel='stylesheet'/> 
-    <style>
-        .search-layout-wrapper{display:flex!important;gap:20px!important;padding:20px!important;align-items:flex-start!important;max-width:1450px!important;margin:0 auto!important;direction:rtl!important;width:100%!important;box-sizing:border-box!important}
-        .search-sidebar{width:300px!important;flex-shrink:0!important;background:#fff!important;border-radius:12px!important;border:1px solid #e0e0e0!important;padding:20px!important;min-height:500px!important;position:sticky!important;top:20px!important;z-index:100!important;box-shadow:0 4px 12px rgba(0,0,0,0.05)!important;display:block!important;box-sizing:border-box!important}
-        #souq-widget-root{flex:1!important;min-width:0!important;width:100%!important;margin:0!important;padding:0!important;display:block!important}
-        .mobile-filter-btn{display:none!important;position:fixed!important;bottom:25px!important;left:25px!important;z-index:9999!important;background:#131921!important;color:#fff!important;border:none!important;padding:12px 20px!important;border-radius:50px!important;box-shadow:0 8px 20px rgba(0,0,0,0.3)!important;font-weight:700!important;align-items:center!important;gap:8px!important;cursor:pointer!important}
-        @media(max-width:992px){
-            .search-layout-wrapper{padding:10px!important;flex-direction:column!important}
-            .search-sidebar{position:fixed!important;right:-350px!important;top:0!important;height:100vh!important;z-index:10001!important;transition:right .4s cubic-bezier(0.4,0,0.2,1)!important;width:320px!important;border-radius:0!important;overflow-y:auto!important;box-shadow:-10px 0 30px rgba(0,0,0,0.2)!important}
-            .search-sidebar.active{right:0!important}
-            .mobile-filter-btn{display:flex!important}
-        }
-        body.dark-mode .search-sidebar{background:#1a1a1a!important;border-color:#333!important;color:#eee!important}
-        body.dark-mode .mobile-filter-btn{background:#333!important;border:1px solid #555!important}
-    </style>
+    <link href='/public/css/search.css' rel='stylesheet'/> 
 </head>
 <body>
 
@@ -47,7 +34,53 @@
 <div class="search-layout-wrapper">
     <aside id="search-sidebar" class="search-sidebar">
         <h3 style="font-size:18px;font-weight:800;margin-bottom:20px;border-bottom:2px solid #febd69;padding-bottom:10px">تصفية البحث</h3>
-        <div id="sidebar-content"></div>
+        
+        <div class="filter-section">
+            <div class="filter-title">الترتيب حسب</div>
+            <select id="sort-select" class="custom-select">
+                <option value="relevance">الأكثر تطابقاً</option>
+                <option value="orders_desc">الأكثر مبيعاً</option>
+                <option value="price_asc">السعر: من الأقل للأعلى</option>
+                <option value="price_desc">السعر: من الأعلى للأقل</option>
+                <option value="rating_desc">الأعلى تقييماً</option>
+            </select>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-title">نطاق السعر</div>
+            <div class="price-inputs">
+                <input type="number" id="min-price" placeholder="من">
+                <input type="number" id="max-price" placeholder="إلى">
+            </div>
+            <button id="apply-price" class="apply-btn">تطبيق السعر</button>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-title">حالة المنتج</div>
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="filter-promo"> يوجد عروض وخصومات
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="filter-instock" checked> متوفر في المخزون
+                </label>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-title">تقييم العملاء</div>
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="radio" name="rating" value="4"> <span class="rating-stars">★★★★☆</span> وأعلى
+                </label>
+                <label class="checkbox-label">
+                    <input type="radio" name="rating" value="3"> <span class="rating-stars">★★★☆☆</span> وأعلى
+                </label>
+                <label class="checkbox-label">
+                    <input type="radio" name="rating" value="0" checked> جميع التقييمات
+                </label>
+            </div>
+        </div>
     </aside>
 
     <main id="souq-widget-root"></main>
@@ -74,7 +107,7 @@
 
     let synonymsDict = {};
     try {
-        const response = await fetch('/pages/services/key.json');
+        const response = await fetch('/key.json');
         if (response.ok) {
             synonymsDict = await response.json();
         }
@@ -186,32 +219,6 @@
         console.groupCollapsed("%c[Linguistic Engine] Generated Query Tokens", "color: #ff6000; font-size: 13px; font-weight: bold;");
         console.table(tableData);
         console.groupEnd();
-
-        let bloomArray = new Array(2048).fill('·');
-        let activeBitsSet = new Set();
-
-        flatVariants.forEach(q => {
-            let hA = murmur(q, 42);
-            let hB = murmur(q, 99);
-            for (let i = 0; i < 8; i++) {
-                let bitPos = Math.abs(hA + i * hB) % 2048;
-                bloomArray[bitPos] = '█';
-                activeBitsSet.add(bitPos);
-            }
-        });
-
-        let gridRows = [];
-        for (let i = 0; i < 32; i++) {
-            gridRows.push(bloomArray.slice(i * 64, (i + 1) * 64).join(''));
-        }
-
-        console.groupCollapsed("%c[Bloom Filter] Matrix Representation (2048 bits)", "color: #08c; font-size: 13px; font-weight: bold;");
-        console.log(
-            "%c" + gridRows.join('\n'), 
-            "background: #0d1117; color: #3fb950; font-family: 'Courier New', Courier, monospace; font-size: 11px; line-height: 1.1; letter-spacing: 4px; padding: 15px; border-radius: 8px; border: 1px solid #30363d;"
-        );
-        console.log("%cActive Indexes:", "color: #e34c26; font-weight: bold;", Array.from(activeBitsSet).sort((a,b)=>a-b).join(', '));
-        console.groupEnd();
     }
 })();
 </script>
@@ -233,6 +240,36 @@
             overlay.style.display = 'none';
         };
     }
+
+    function gatherFiltersAndSearch() {
+        const minPrice = document.getElementById('min-price').value;
+        const maxPrice = document.getElementById('max-price').value;
+        
+        window.currentFilters = {
+            sortBy: document.getElementById('sort-select').value,
+            minPrice: minPrice ? parseFloat(minPrice) : null,
+            maxPrice: maxPrice ? parseFloat(maxPrice) : null,
+            hasPromo: document.getElementById('filter-promo').checked,
+            inStock: document.getElementById('filter-instock').checked,
+            minRating: parseInt(document.querySelector('input[name="rating"]:checked').value)
+        };
+
+        if (window.triggerWorkerSearch && typeof window.triggerWorkerSearch === 'function') {
+            window.triggerWorkerSearch();
+            if (window.innerWidth <= 992) {
+                sidebar.classList.remove('active');
+                overlay.style.display = 'none';
+            }
+        }
+    }
+
+    document.getElementById('sort-select').addEventListener('change', gatherFiltersAndSearch);
+    document.getElementById('apply-price').addEventListener('click', gatherFiltersAndSearch);
+    document.getElementById('filter-promo').addEventListener('change', gatherFiltersAndSearch);
+    document.getElementById('filter-instock').addEventListener('change', gatherFiltersAndSearch);
+    document.querySelectorAll('input[name="rating"]').forEach(radio => {
+        radio.addEventListener('change', gatherFiltersAndSearch);
+    });
 })();
 </script>
 
