@@ -107,7 +107,7 @@
 
     let synonymsDict = {};
     try {
-        const response = await fetch('/public/json/key.json?v=');
+        const response = await fetch('/public/json/key.json?v=' + Date.now());
         if (response.ok) {
             synonymsDict = await response.json();
         }
@@ -218,6 +218,32 @@
 
         console.groupCollapsed("%c[Linguistic Engine] Generated Query Tokens", "color: #ff6000; font-size: 13px; font-weight: bold;");
         console.table(tableData);
+        console.groupEnd();
+
+        let bloomArray = new Array(2048).fill('·');
+        let activeBitsSet = new Set();
+
+        flatVariants.forEach(q => {
+            let hA = murmur(q, 42);
+            let hB = murmur(q, 99);
+            for (let i = 0; i < 8; i++) {
+                let bitPos = Math.abs(hA + i * hB) % 2048;
+                bloomArray[bitPos] = '█';
+                activeBitsSet.add(bitPos);
+            }
+        });
+
+        let gridRows = [];
+        for (let i = 0; i < 32; i++) {
+            gridRows.push(bloomArray.slice(i * 64, (i + 1) * 64).join(''));
+        }
+
+        console.groupCollapsed("%c[Bloom Filter] Matrix Representation (2048 bits)", "color: #08c; font-size: 13px; font-weight: bold;");
+        console.log(
+            "%c" + gridRows.join('\n'), 
+            "background: #0d1117; color: #3fb950; font-family: 'Courier New', Courier, monospace; font-size: 11px; line-height: 1.1; letter-spacing: 4px; padding: 15px; border-radius: 8px; border: 1px solid #30363d;"
+        );
+        console.log("%cActive Indexes:", "color: #e34c26; font-weight: bold;", Array.from(activeBitsSet).sort((a,b)=>a-b).join(', '));
         console.groupEnd();
     }
 })();
