@@ -59,8 +59,8 @@
 <script defer src='/public/js/grid.js'></script>  
 <script defer src='/public/js/corepress.js'></script>    
 <script defer src='/public/js/search.js'></script>
-    
-<script>
+
+<script id="linguistic-engine">
 (function() {
     const urlParams = new URLSearchParams(window.location.search);
     const query = urlParams.get("query")?.trim() || "";
@@ -168,7 +168,11 @@
         console.log("%cمؤشرات البتات المفعلة (Indexes):", "color: #e34c26; font-weight: bold;", Array.from(activeBitsSet).sort((a,b)=>a-b).join(', '));
         console.groupEnd();
     }
+})();
+</script>
 
+<script id="sidebar-ui-logic">
+(function() {
     const trigger = document.getElementById('mobile-filter-trigger');
     const sidebar = document.getElementById('search-sidebar');
     const overlay = document.getElementById('widget-overlay');
