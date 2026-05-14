@@ -119,33 +119,24 @@
             tempArr.forEach(v => {
                 if (v.startsWith("ال")) currentSet.add(v.substring(2));
                 else currentSet.add("ال" + v);
-
-                if (v.match(/^(وال|فال|بال|كال|لل)/)) currentSet.add(v.substring(3));
-                else if (v.match(/^(ب|ف|ك|و)(ال)/)) currentSet.add(v.substring(1));
             });
 
             tempArr = Array.from(currentSet);
             tempArr.forEach(v => {
-                if (v.endsWith("ة")) currentSet.add(v.slice(0, -1) + "ه");
-                if (v.endsWith("ه")) currentSet.add(v.slice(0, -1) + "ة");
+                if (v.endsWith("ة")) {
+                    currentSet.add(v.slice(0, -1) + "ه");
+                    currentSet.add(v.slice(0, -1) + "ات"); // سماعة -> سماعات
+                }
+                if (v.endsWith("ه")) {
+                    currentSet.add(v.slice(0, -1) + "ة");
+                    currentSet.add(v.slice(0, -1) + "ات");
+                }
 
-                const suffixes = /(ات|ون|ين|ان|ها|هم|كم|نا|ي)$/;
+                // تجريد الجمع للوصول للمفرد فقط (بدون توليد جموع عشوائية)
+                const suffixes = /(ات|ون|ين)$/;
                 if (v.match(suffixes)) {
                     let stripped = v.replace(suffixes, "");
-                    if (stripped.length > 1) {
-                        currentSet.add(stripped);
-                        currentSet.add(stripped + "ات");
-                        currentSet.add(stripped + "ين");
-                    }
-                } else if (v.length > 2 && !/[a-zA-Z]/.test(v)) {
-                    if (v.endsWith("ة") || v.endsWith("ه")) {
-                        let root = v.slice(0, -1);
-                        currentSet.add(root + "ات");
-                    } else {
-                        currentSet.add(v + "ات");
-                        currentSet.add(v + "ون");
-                        currentSet.add(v + "ين");
-                    }
+                    if (stripped.length > 2) currentSet.add(stripped);
                 }
             });
 
