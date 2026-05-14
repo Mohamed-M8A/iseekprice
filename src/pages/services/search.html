@@ -61,7 +61,7 @@
 <script defer src='/public/js/search.js'></script>
 
 <script id="linguistic-engine">
-(function() {
+(async function() {
     const urlParams = new URLSearchParams(window.location.search);
     const query = urlParams.get("query")?.trim() || "";
     const heading = document.getElementById("query-heading");
@@ -71,6 +71,14 @@
     } else {
         heading.innerText = "أحدث المنتجات";
     }
+
+    let synonymsDict = {};
+    try {
+        const response = await fetch('/key.json');
+        if (response.ok) {
+            synonymsDict = await response.json();
+        }
+    } catch (e) {}
 
     function murmur(str, seed) {
         let h = seed ^ str.length;
@@ -109,11 +117,26 @@
             let n = normalize(word);
             currentSet.add(n);
 
-            if (/[a-zA-Z]/.test(word)) {
-                currentSet.add(word.toLowerCase());
-                currentSet.add(word.toUpperCase());
-                currentSet.add(normalize(translit(word.toLowerCase())));
-            }
+            let expandedWords = [word, n];
+            
+            if (synonymsDict[word]) expandedWords.push(...synonymsDict[word]);
+            if (synonymsDict[n]) expandedWords.push(...synonymsDict[n]);
+            
+            Object.keys(synonymsDict).forEach(k => {
+                if (synonymsDict[k].includes(word) || synonymsDict[k].includes(n)) {
+                    expandedWords.push(k, ...synonymsDict[k]);
+                }
+            });
+
+            expandedWords.forEach(w => {
+                let cleanW = normalize(w);
+                currentSet.add(cleanW);
+                if (/[a-zA-Z]/.test(w)) {
+                    currentSet.add(w.toLowerCase());
+                    currentSet.add(w.toUpperCase());
+                    currentSet.add(normalize(translit(w.toLowerCase())));
+                }
+            });
 
             let tempArr = Array.from(currentSet);
             tempArr.forEach(v => {
@@ -125,14 +148,13 @@
             tempArr.forEach(v => {
                 if (v.endsWith("ة")) {
                     currentSet.add(v.slice(0, -1) + "ه");
-                    currentSet.add(v.slice(0, -1) + "ات"); // سماعة -> سماعات
+                    currentSet.add(v.slice(0, -1) + "ات");
                 }
                 if (v.endsWith("ه")) {
                     currentSet.add(v.slice(0, -1) + "ة");
                     currentSet.add(v.slice(0, -1) + "ات");
                 }
 
-                // تجريد الجمع للوصول للمفرد فقط (بدون توليد جموع عشوائية)
                 const suffixes = /(ات|ون|ين)$/;
                 if (v.match(suffixes)) {
                     let stripped = v.replace(suffixes, "");
