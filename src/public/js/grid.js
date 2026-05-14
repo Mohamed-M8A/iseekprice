@@ -119,6 +119,17 @@ async function startWidget() {
     if (!root) return;
 
     try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const rawQuery = urlParams.get('query')?.trim();
+
+        if (rawQuery) {
+            let attempts = 0;
+            while (!window.searchVariants && attempts < 20) {
+                await new Promise(resolve => setTimeout(resolve, 50));
+                attempts++;
+            }
+        }
+
         const mapRes = await fetch(`${WIDGET_CONFIG.BASE_URL}General/map.json?v=${Date.now()}`);
         window.fileMap = await mapRes.json();
         const fileMap = window.fileMap;
@@ -193,15 +204,15 @@ async function startWidget() {
             }
         };
 
-        const urlParams = new URLSearchParams(window.location.search);
         worker.postMessage({
-         baseUrl: WIDGET_CONFIG.BASE_URL,
-         coreFile: coreFile,
-         metaFile: metaFile,
-         feedBuffer: window.sharedFeedBuffer,
-         query: urlParams.get('query'),
-         storeId: urlParams.get('store')
-         });
+            baseUrl: WIDGET_CONFIG.BASE_URL,
+            coreFile: coreFile,
+            metaFile: metaFile,
+            feedBuffer: window.sharedFeedBuffer,
+            query: window.searchVariants || rawQuery,
+            storeId: urlParams.get('store'),
+            filters: window.currentFilters || null
+        });
 
         loadMoreBtn.onclick = renderNextBatch;
     } catch (err) {
