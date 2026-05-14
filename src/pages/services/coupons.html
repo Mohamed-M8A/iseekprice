@@ -10,7 +10,7 @@
 <script src='/public/js/grid.js'></script>  
 <script defer src='/public/js/corepress.js'></script>    
 <script defer src='/public/js/search.js'></script>
-<title>كوبونات الخصم الحصرية</title>
+<title>كوبونات الخصم</title>
 <style>
     .coupon-hero {
         background: linear-gradient(135deg, #d93025 0%, #ff5252 100%);
@@ -23,9 +23,9 @@
     }
     .coupon-hero h1 { margin: 0; font-size: 26px; }
     .coupon-hero p { margin: 10px 0 0; opacity: 0.9; }
-    .product-grid { margin-top: 20px; min-height: 200px; }
+    .product-grid { margin-top: 20px; min-height: 200px; display: flex; flex-wrap: wrap; justify-content: center; }
     .post-card.title-link { border: 2px dashed #d93025 !important; }
-    .no-results-msg { text-align: center; padding: 60px; font-size: 1.2em; color: #666; width: 100%; }
+    .no-coupons { text-align: center; padding: 60px; font-size: 1.2em; color: #666; width: 100%; }
 </style>
 </head>
 <body>
@@ -46,8 +46,8 @@
 
 <main class="main-content">
     <div class="coupon-hero">
-        <h1>المنتجات التي تحتوي على كوبونات</h1>
-        <p>عرض حصري للمنتجات التي تتوفر لها أكواد خصم وعروض ترويجية فقط</p>
+        <h1>المنتجات المتوفر لها كوبونات حالياً</h1>
+        <p>يتم فحص وتحديث الكوبونات بشكل آلي ومستمر</p>
     </div>
     <div id="souq-widget-root"></div>
 </main>
@@ -55,110 +55,84 @@
 <footer id='footer' itemscope='itemscope' itemtype='https://schema.org/WPFooter'></footer>
 
 <script>
-    async function runCouponEngine() {
+    async function startCouponPage() {
         if (typeof Renderer === 'undefined' || typeof WIDGET_CONFIG === 'undefined' || typeof workerCode === 'undefined') {
-            setTimeout(runCouponEngine, 100);
+            setTimeout(startCouponPage, 100);
             return;
         }
 
         const root = document.getElementById(WIDGET_CONFIG.ROOT_ID);
-        if (!root) return;
-
         root.innerHTML = `
             <div id="product-posts" class="product-grid"></div>
-            <div id="loader" class="loader-container"><div class="spinner"></div></div>
-            <button id="load-more" class="load-more-btn" style="display:none;">عرض المزيد من العروض</button>`;
+            <div id="loader" class="loader-container" style="display:flex;justify-content:center;padding:50px;"><div class="spinner"></div></div>
+            <button id="load-more" class="load-more-btn" style="display:none;">عرض المزيد</button>`;
         
         const grid = document.getElementById('product-posts');
-        const loadMoreBtn = document.getElementById('load-more');
         const loader = document.getElementById('loader');
+        const loadMoreBtn = document.getElementById('load-more');
         const renderer = new Renderer('product-posts', WIDGET_CONFIG.PLACEHOLDER);
         
-        let storeData = { core: [], feed: new Map() };
+        let couponProducts = [];
+        let globalFeed = new Map();
         let currentIndex = 0;
-        let isFullyLoaded = false;
-        let initialRenderDone = false;
 
         const blob = new Blob([workerCode], { type: 'application/javascript' });
         const worker = new Worker(URL.createObjectURL(blob));
 
-        const renderBatch = () => {
-            const size = (currentIndex === 0) ? WIDGET_CONFIG.INITIAL_SIZE : WIDGET_CONFIG.BATCH_SIZE;
-            const limit = Math.min(currentIndex + size, storeData.core.length);
-            const batch = storeData.core.slice(currentIndex, limit);
-            
+        const renderItems = () => {
+            const batch = couponProducts.slice(currentIndex, currentIndex + 20);
             if (batch.length > 0) {
-                renderer.renderBatch(batch, WIDGET_CONFIG.DOMAIN, storeData.feed);
-                currentIndex = limit;
+                renderer.renderBatch(batch, WIDGET_CONFIG.DOMAIN, globalFeed);
+                currentIndex += batch.length;
             }
-            
-            if (isFullyLoaded && currentIndex >= storeData.core.length) {
-                loadMoreBtn.style.display = 'none';
-            } else if (storeData.core.length > currentIndex) {
-                loadMoreBtn.style.display = 'block';
-            }
+            loadMoreBtn.style.display = (currentIndex < couponProducts.length) ? 'block' : 'none';
         };
 
         worker.onmessage = (e) => {
             if (e.data.type === 'BATCH') {
-                e.data.feed.forEach((val, key) => storeData.feed.set(key, val));
-
-                const promoOnlyBatch = e.data.batch.filter(item => {
-                    const f = e.data.feed.get(item.id);
-                    return f && f.status.promo === 1;
+                e.data.feed.forEach((v, k) => globalFeed.set(k, v));
+                
+                const found = e.data.batch.filter(item => {
+                    const feed = e.data.feed.get(item.id);
+                    return feed && feed.status && feed.status.promo === 1;
                 });
 
-                if (promoOnlyBatch.length > 0) {
-                    loader.style.display = 'none';
-                    storeData.core.push(...promoOnlyBatch);
-                    if (!initialRenderDone) {
-                        renderBatch();
-                        initialRenderDone = true;
-                    }
+                if (found.length > 0) {
+                    couponProducts.push(...found);
+                    renderItems();
                 }
             } else if (e.data.type === 'DONE') {
-                isFullyLoaded = true;
                 loader.style.display = 'none';
-                if (storeData.core.length === 0) {
-                    grid.innerHTML = '<div class="no-results-msg">لا توجد منتجات بكوبونات متوفرة حالياً</div>';
-                } else {
-                    if (!initialRenderDone) renderBatch();
-                    if (currentIndex < storeData.core.length) loadMoreBtn.style.display = 'block';
+                if (couponProducts.length === 0) {
+                    grid.innerHTML = '<div class="no-coupons">لا توجد كوبونات متاحة في هذه اللحظة، يرجى المحاولة لاحقاً.</div>';
                 }
             }
         };
 
-        loadMoreBtn.onclick = renderBatch;
+        loadMoreBtn.onclick = renderItems;
 
         try {
             const mapRes = await fetch(`${WIDGET_CONFIG.BASE_URL}General/map.json?v=${Date.now()}`);
             const fileMap = await mapRes.json();
             const country = localStorage.getItem("Cntry") || "SA";
-            
-            const feedUrl = `${WIDGET_CONFIG.BASE_URL}${country}/feed_${fileMap.regions[country].feed}.bin`;
-            const feedRes = await fetch(feedUrl);
-            const sharedFeedBuffer = await feedRes.arrayBuffer();
+            const feedRes = await fetch(`${WIDGET_CONFIG.BASE_URL}${country}/feed_${fileMap.regions[country].feed}.bin`);
+            const feedBuf = await feedRes.arrayBuffer();
 
             worker.postMessage({
                 baseUrl: WIDGET_CONFIG.BASE_URL,
                 coreFile: `General/core_${fileMap.core}.bin`,
                 metaFile: `General/meta_${fileMap.meta}.bin`,
-                feedBuffer: sharedFeedBuffer,
+                feedBuffer: feedBuf,
                 query: null,
                 storeId: null,
-                filters: {
-                    hasPromo: true,
-                    inStock: true
-                }
+                filters: { hasPromo: true }
             });
-
         } catch (err) {
             loader.style.display = 'none';
-            grid.innerHTML = '<div class="no-results-msg">حدث خطأ أثناء تحميل الكوبونات</div>';
         }
     }
 
-    window.addEventListener('DOMContentLoaded', runCouponEngine);
+    window.addEventListener('DOMContentLoaded', startCouponPage);
 </script>
 </body>
 </html>
