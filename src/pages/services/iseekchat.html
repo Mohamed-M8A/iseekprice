@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>ISeekChat Messenger PRO</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;700&display=swap');:root{--orange:#ff8c00;--orange-g:linear-gradient(135deg,#ff8c00,#ff5e00);--bg:#0b0d0f;--sidebar:#111418;--card:#1a1d23;--brd:rgba(255,255,255,0.05);--text:#ececec}*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);overflow:hidden;font-family:'Cairo',sans-serif;color:var(--text)}#bg-canvas{position:fixed;top:0;left:0;z-index:0;pointer-events:none}#app{display:flex;height:100vh;width:100vw;position:relative;z-index:1;background:rgba(11,13,15,0.4);backdrop-filter:blur(3px)}#sidebar{width:300px;background:rgba(17,20,24,0.85);border-left:1px solid var(--brd);display:flex;flex-direction:column;transition:.3s;backdrop-filter:blur(10px)}.new-chat-btn{margin:20px;padding:14px;background:var(--orange-g);border-radius:12px;color:#fff;text-align:center;cursor:pointer;font-weight:700;box-shadow:0 4px 15px rgba(255,140,0,0.2);transition:.3s}.new-chat-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(255,140,0,0.4)}#chat-list{flex:1;overflow-y:auto;padding:10px}#chat-list::-webkit-scrollbar{width:3px}#chat-list::-webkit-scrollbar-thumb{background:var(--brd)}.chat-item{display:flex;justify-content:space-between;align-items:center;padding:15px;border-radius:12px;margin-bottom:8px;cursor:pointer;transition:.2s;background:rgba(255,255,255,0.03);border:1px solid transparent;font-size:14px}.chat-item:hover{background:rgba(255,255,255,0.07);border-color:var(--brd)}.chat-item.active{background:rgba(255,140,0,0.1);border-right:4px solid var(--orange)}.chat-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}.del-btn{opacity:0.6;color:#ff4757;font-size:15px;padding:5px;transition:.2s}.del-btn:hover{opacity:1;transform:scale(1.2)}#main-chat{flex:1;display:flex;flex-direction:column;position:relative}#chat-header{padding:18px 30px;background:rgba(17,20,24,0.7);backdrop-filter:blur(20px);border-bottom:1px solid var(--brd);display:flex;justify-content:space-between;align-items:center}.status{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:1px;transition:.3s}.dot{width:10px;height:10px;background:var(--orange);border-radius:50%;box-shadow:0 0 15px var(--orange);animation:pulse 2s infinite;transition:.3s}.back-link{text-decoration:none;background:var(--card);border:1px solid var(--brd);padding:8px 16px;border-radius:10px;color:var(--orange);font-size:13px;display:flex;align-items:center;gap:8px;transition:.3s;font-weight:700}.back-link svg{width:16px;height:16px;stroke:var(--orange);fill:none;transition:.3s}.back-link:hover{background:var(--orange);color:#fff}.back-link:hover svg{stroke:#fff}#chat-box{flex:1;overflow-y:auto;padding:40px;display:flex;flex-direction:column;gap:25px}#chat-box::-webkit-scrollbar{width:5px}#chat-box::-webkit-scrollbar-thumb{background:var(--brd);border-radius:10px}.msg{display:flex;width:100%;animation:fadeIn .4s ease}.bubble{padding:16px 22px;border-radius:20px;max-width:80%;font-size:15px;line-height:1.8;box-shadow:0 10px 30px rgba(0,0,0,0.15);word-wrap:break-word}.bot .bubble{background:var(--card);border:1px solid var(--brd);border-bottom-right-radius:5px}.user .bubble{background:var(--orange-g);color:#fff;margin-right:auto;border-bottom-left-radius:5px;box-shadow:0 8px 25px rgba(255,94,0,0.2)}#input-area{padding:25px;background:linear-gradient(to top,var(--bg),transparent)}.input-wrap{background:rgba(26,29,35,0.85);backdrop-filter:blur(15px);border-radius:20px;display:flex;align-items:center;padding:10px 20px;border:1px solid var(--brd);max-width:900px;margin:0 auto;box-shadow:0 20px 40px rgba(0,0,0,0.4)}#user-input{flex:1;background:transparent;border:none;color:#fff;padding:12px;outline:none;font-family:inherit;font-size:15px;resize:none;max-height:150px}#send-btn{background:none;border:none;cursor:pointer;padding:5px;transition:.3s}#send-btn svg{width:28px;height:28px;stroke:var(--orange)}#send-btn:hover{transform:scale(1.1) rotate(-10deg);filter:drop-shadow(0 0 8px var(--orange))}.modal-ov{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(5px)}.modal-cnt{background:var(--card);padding:25px;border-radius:20px;width:90%;max-width:320px;text-align:center;border:1px solid var(--brd)}.modal-cnt h4{margin:0 0 15px;font-size:18px}.modal-btns{display:flex;gap:10px;justify-content:center}.m-btn{padding:10px 20px;border-radius:10px;border:none;cursor:pointer;font-weight:700}.m-confirm{background:#ff4757;color:#fff}.m-cancel{background:var(--brd);color:var(--text)}@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,140,0,0.4)}70%{box-shadow:0 0 0 10px rgba(255,140,0,0)}100%{box-shadow:0 0 0 0 rgba(255,140,0,0)}}@keyframes fadeIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}@media (max-width:768px){#sidebar{position:fixed;right:-100%;height:100%;z-index:500}#sidebar.open{right:0}#input-area{padding:15px}.bubble{max-width:90%}#chat-box{padding:20px}}
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;700&display=swap');:root{--orange:#e07a1f;--bg:#080808;--sidebar:#0f0f0f;--card:#141414;--brd:rgba(255,255,255,0.06);--text:#e0e0e0;--trans:all 0.4s cubic-bezier(0.4,0,0.2,1)}*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);overflow:hidden;font-family:'Cairo',sans-serif;color:var(--text)}#bg-canvas{position:fixed;top:0;left:0;z-index:0;pointer-events:none}#app{display:flex;height:100vh;width:100vw;position:relative;z-index:1;background:rgba(8,8,8,0.5);backdrop-filter:blur(2px)}#sidebar{width:280px;background:var(--sidebar);border-left:1px solid var(--brd);display:flex;flex-direction:column;transition:var(--trans)}.new-chat-btn{margin:20px;padding:12px;background:transparent;border:1px solid var(--orange);border-radius:8px;color:var(--orange);text-align:center;cursor:pointer;font-weight:600;transition:var(--trans)}.new-chat-btn:hover{background:rgba(224,122,31,0.1);transform:translateY(-1px)}#chat-list{flex:1;overflow-y:auto;padding:10px}#chat-list::-webkit-scrollbar{width:3px}#chat-list::-webkit-scrollbar-thumb{background:var(--brd);border-radius:3px}.chat-item{display:flex;justify-content:space-between;align-items:center;padding:14px;border-radius:8px;margin-bottom:6px;cursor:pointer;transition:var(--trans);background:transparent;border:1px solid transparent;font-size:13.5px;color:#a0a0a0}.chat-item:hover{background:rgba(255,255,255,0.02);color:var(--text)}.chat-item.active{background:var(--card);border:1px solid var(--brd);color:var(--text)}.chat-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px}.del-btn{opacity:0;color:#ef4444;font-size:14px;padding:5px;transition:var(--trans)}.chat-item:hover .del-btn{opacity:0.5}.del-btn:hover{opacity:1!important;transform:scale(1.1)}#main-chat{flex:1;display:flex;flex-direction:column;position:relative}#chat-header{padding:16px 25px;background:rgba(15,15,15,0.8);backdrop-filter:blur(15px);border-bottom:1px solid var(--brd);display:flex;justify-content:space-between;align-items:center}.status{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14px;transition:var(--trans)}.dot{width:8px;height:8px;background:var(--orange);border-radius:50%;box-shadow:0 0 10px rgba(224,122,31,0.5);transition:var(--trans)}.back-link{text-decoration:none;background:transparent;border:1px solid var(--brd);padding:6px 14px;border-radius:6px;color:var(--text);font-size:12px;display:flex;align-items:center;gap:6px;transition:var(--trans)}.back-link svg{width:14px;height:14px;stroke:var(--text);fill:none;transition:var(--trans)}.back-link:hover{background:var(--card);border-color:var(--orange);color:var(--orange)}.back-link:hover svg{stroke:var(--orange)}#chat-box{flex:1;overflow-y:auto;padding:30px;display:flex;flex-direction:column;gap:20px}#chat-box::-webkit-scrollbar{width:4px}#chat-box::-webkit-scrollbar-thumb{background:var(--brd);border-radius:4px}.msg{display:flex;width:100%;animation:fadeIn .5s cubic-bezier(0.16,1,0.3,1)}.bubble{padding:14px 20px;border-radius:12px;max-width:75%;font-size:14.5px;line-height:1.7;word-wrap:break-word}.bot .bubble{background:var(--card);border:1px solid var(--brd);border-bottom-right-radius:4px;color:var(--text)}.user .bubble{background:rgba(224,122,31,0.15);border:1px solid rgba(224,122,31,0.3);color:#fff;margin-right:auto;border-bottom-left-radius:4px}#input-area{padding:20px;background:linear-gradient(to top,var(--bg),transparent)}.input-wrap{background:var(--card);border-radius:12px;display:flex;align-items:center;padding:8px 16px;border:1px solid var(--brd);max-width:850px;margin:0 auto;transition:var(--trans)}.input-wrap:focus-within{border-color:rgba(224,122,31,0.5);box-shadow:0 0 20px rgba(0,0,0,0.5)}#user-input{flex:1;background:transparent;border:none;color:#fff;padding:10px;outline:none;font-family:inherit;font-size:14.5px;resize:none;max-height:120px}#send-btn{background:none;border:none;cursor:pointer;padding:6px;opacity:0.6;transition:var(--trans)}#send-btn svg{width:22px;height:22px;stroke:var(--text)}#send-btn:hover{opacity:1;transform:translateX(-3px)}#send-btn:hover svg{stroke:var(--orange)}.modal-ov{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}.modal-cnt{background:var(--card);padding:25px;border-radius:12px;width:90%;max-width:320px;text-align:center;border:1px solid var(--brd)}.modal-cnt h4{margin:0 0 10px;font-size:16px;font-weight:600}.modal-cnt p{font-size:13px;color:#a0a0a0;margin-bottom:20px}.modal-btns{display:flex;gap:10px;justify-content:center}.m-btn{padding:8px 16px;border-radius:6px;border:1px solid transparent;cursor:pointer;font-weight:600;font-size:13px;transition:var(--trans)}.m-confirm{background:rgba(239,68,68,0.1);color:#ef4444;border-color:rgba(239,68,68,0.3)}.m-confirm:hover{background:#ef4444;color:#fff}.m-cancel{background:transparent;color:var(--text);border-color:var(--brd)}.m-cancel:hover{background:var(--brd)}@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@media (max-width:768px){#sidebar{position:fixed;right:-100%;height:100%;z-index:500}#sidebar.open{right:0}#input-area{padding:15px}.bubble{max-width:90%}#chat-box{padding:15px}}
 </style>
 </head>
 <body>
@@ -44,9 +44,8 @@
     <div class="modal-cnt">
         <h4>حذف المحادثة؟</h4>
         <p>لا يمكن التراجع عن هذا الإجراء.</p>
-        <br>
         <div class="modal-btns">
-            <button class="m-btn m-confirm" id="confirmDel">حذف</button>
+            <button class="m-btn m-confirm" id="confirmDel">تأكيد الحذف</button>
             <button class="m-btn m-cancel" onclick="closeModal()">إلغاء</button>
         </div>
     </div>
@@ -142,7 +141,9 @@ async function renderChatList() {
         const item = document.createElement('div');
         item.className = `chat-item ${s.id === currentSessionId ? 'active' : ''}`;
         item.onclick = () => loadChat(s.id);
-        item.innerHTML = `<span>${s.title}</span><div class="del-btn" onclick="confirmDelete('${s.id}', event)">🗑</div>`;
+        item.innerHTML = `<span>${s.title}</span><div class="del-btn" onclick="confirmDelete('${s.id}', event)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </div>`;
         list.appendChild(item);
     });
 }
@@ -189,29 +190,31 @@ function displayMessage(text, side) {
 /* =========================================
    [5] SMART LOGIC (CACHE & INTENT & SEND)
    ========================================= */
-
-// 1. الذكاء المحلي: التنبؤ بالنية أثناء الكتابة لتغيير لون وحالة المؤشر
 document.getElementById('user-input').addEventListener('input', (e) => {
     const val = e.target.value.toLowerCase();
     const dot = document.getElementById('status-dot');
     const text = document.getElementById('status-text');
     
+    // ألوان هادئة وراقية تناسب الدارك مود
     if (val.includes('سعر') || val.includes('بكم') || val.includes('تكلفة')) {
-        dot.style.background = '#00ff88'; dot.style.boxShadow = '0 0 15px #00ff88'; text.innerText = 'يحلل الأسعار...';
+        dot.style.background = '#10b981'; dot.style.boxShadow = '0 0 8px rgba(16,185,129,0.5)'; text.innerText = 'تحليل الأسعار...';
     } else if (val.includes('توصيل') || val.includes('شحن') || val.includes('مكان')) {
-        dot.style.background = '#00d2ff'; dot.style.boxShadow = '0 0 15px #00d2ff'; text.innerText = 'يراجع اللوجستيات...';
+        dot.style.background = '#3b82f6'; dot.style.boxShadow = '0 0 8px rgba(59,130,246,0.5)'; text.innerText = 'مراجعة اللوجستيات...';
     } else {
         dot.style.background = ''; dot.style.boxShadow = ''; text.innerText = 'ISEEKPRICE AI';
     }
+    
+    // ضبط ارتفاع حقل الإدخال تلقائياً
+    e.target.style.height = 'auto';
+    e.target.style.height = (e.target.scrollHeight < 120 ? e.target.scrollHeight : 120) + 'px';
 });
 
-// 2. نظام التخزين المؤقت (Cache) لتقليل الضغط على السيرفر
 async function getCachedReply(question) {
     const sessions = await getAllSessions();
     for(let s of sessions) {
         for(let i=0; i < s.messages.length - 1; i++) {
             if(s.messages[i].side === 'user' && s.messages[i].text === question && s.messages[i+1].side === 'bot') {
-                return s.messages[i+1].text; // إرجاع الإجابة السابقة
+                return s.messages[i+1].text; 
             }
         }
     }
@@ -230,16 +233,14 @@ async function handleSend() {
 
     displayMessage(text, 'user');
     session.messages.push({ text, side: 'user' });
-    input.value = '';
+    input.value = ''; input.style.height = 'auto';
 
-    // إرجاع المؤشر لحالته الطبيعية
     document.getElementById('status-dot').style.background = ''; 
     document.getElementById('status-text').innerText = 'ISEEKPRICE AI';
 
-    // فحص الذاكرة المؤقتة (Cache)
     const cachedReply = await getCachedReply(text);
     if(cachedReply) {
-        displayMessage(cachedReply + "\n*(إجابة سريعة من الذاكرة ⚡)*", 'bot');
+        displayMessage(cachedReply, 'bot');
         session.messages.push({ text: cachedReply, side: 'bot' });
         await saveSession(session);
         return;
@@ -248,7 +249,7 @@ async function handleSend() {
     const matchedUIDs = getMatchedUIDs(text);
     const loading = document.createElement('div');
     loading.className = 'msg bot';
-    loading.innerHTML = '<div class="bubble">جاري تحليل البيانات... 🔍</div>';
+    loading.innerHTML = '<div class="bubble" style="opacity:0.7">جاري المعالجة...</div>';
     document.getElementById('chat-box').appendChild(loading);
 
     try {
@@ -262,7 +263,7 @@ async function handleSend() {
         session.messages.push({ text: data.reply, side: 'bot' });
         await saveSession(session);
     } catch (e) {
-        loading.innerHTML = '<div class="bubble" style="color:#ff4757">حدث خطأ في الاتصال بالسيرفر. يرجى المحاولة لاحقاً. ❌</div>';
+        loading.innerHTML = '<div class="bubble" style="color:#ef4444; border-color:rgba(239,68,68,0.3)">حدث خطأ في الاتصال.</div>';
     }
 }
 
@@ -271,22 +272,34 @@ document.getElementById('user-input').addEventListener('keydown', (e) => {
 });
 
 /* =========================================
-   [6] INTERACTIVE BACKGROUND CANVAS
+   [6] INTERACTIVE NEURAL NETWORK CANVAS
    ========================================= */
 const canvas = document.getElementById('bg-canvas');
 const ctx = canvas.getContext('2d');
-let points = [];
-const spacing = 40; 
+let particles = [];
 let mouse = { x: null, y: null };
+const connectionRange = 250; // نطاق واسع جداً للاستجابة للماوس
+
+class Particle {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.vx = (Math.random() - 0.5) * 0.3; // حركة بطيئة وناعمة
+        this.vy = (Math.random() - 0.5) * 0.3;
+        this.baseSize = Math.random() * 1.5 + 0.5;
+    }
+    update() {
+        this.x += this.vx; this.y += this.vy;
+        if(this.x < 0 || this.x > canvas.width) this.vx *= -1;
+        if(this.y < 0 || this.y > canvas.height) this.vy *= -1;
+    }
+}
 
 function initCanvas() {
     canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-    points = [];
-    for (let x = 0; x < canvas.width; x += spacing) {
-        for (let y = 0; y < canvas.height; y += spacing) {
-            points.push({ x, y, baseSize: 1.5 });
-        }
-    }
+    particles = [];
+    let particleCount = (canvas.width * canvas.height) / 15000; 
+    for (let i = 0; i < particleCount; i++) particles.push(new Particle());
 }
 
 window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
@@ -294,17 +307,35 @@ window.addEventListener('mouseout', () => { mouse.x = null; mouse.y = null; });
 
 function animateCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    points.forEach(p => {
-        let dist = 1000;
-        if(mouse.x !== null) dist = Math.hypot(mouse.x - p.x, mouse.y - p.y);
-        const active = dist < 120;
+    
+    particles.forEach(p => {
+        p.update();
+        let distToMouse = 1000;
+        if (mouse.x !== null) distToMouse = Math.hypot(mouse.x - p.x, mouse.y - p.y);
         
+        // رسم النقطة (عقدة)
         ctx.beginPath();
-        ctx.arc(p.x, p.y, active ? 2.5 : p.baseSize, 0, Math.PI * 2);
-        ctx.fillStyle = active ? `rgba(255, 140, 0, ${1 - dist/120})` : 'rgba(255, 255, 255, 0.05)';
-        if(active) { ctx.shadowBlur = 10; ctx.shadowColor = 'rgba(255, 140, 0, 0.8)'; } 
-        else { ctx.shadowBlur = 0; }
+        ctx.arc(p.x, p.y, p.baseSize, 0, Math.PI * 2);
+        // لون النقطة خافت جداً، يضيء باللون الأبيض/الفضي عند اقتراب الماوس
+        ctx.fillStyle = distToMouse < connectionRange ? `rgba(255, 255, 255, ${1 - distToMouse/connectionRange})` : 'rgba(255, 255, 255, 0.03)';
         ctx.fill();
+
+        // رسم الخطوط (الشبكة العصبية)
+        if (distToMouse < connectionRange) {
+            particles.forEach(p2 => {
+                let distToP2 = Math.hypot(p.x - p2.x, p.y - p2.y);
+                if(distToP2 < 100) { // مسافة ربط النقاط ببعضها
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    // لون الخط فضي ناعم يختفي بسلاسة
+                    let opacity = (1 - distToMouse/connectionRange) * (1 - distToP2/100) * 0.5;
+                    ctx.strokeStyle = `rgba(220, 225, 230, ${opacity})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            });
+        }
     });
     requestAnimationFrame(animateCanvas);
 }
